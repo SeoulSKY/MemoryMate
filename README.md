@@ -45,6 +45,8 @@ This option only works in a `macOS`
 * Set `Device Type` as `iPhone 15 Pro Max`
 * Set `OS Version` as `iOS 17.4`
 * Press the `Create` button
+* Open up the Simulator
+* Navigate to `File` -> `Open Simulator`, then select `iPhone 15 Pro Max`
 
 #### Running on a Simulator
 
