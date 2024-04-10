@@ -22,3 +22,8 @@ rules:
   "@typescript-eslint/no-unused-vars":
     - error
     - varsIgnorePattern: "^_"
+  "@typescript-eslint/naming-convention":
+    - error
+    - selector: "enumMember"
+      format:
+      - UPPER_CASE
