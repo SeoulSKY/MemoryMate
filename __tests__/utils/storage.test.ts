@@ -25,7 +25,7 @@ function mockGetInfoAsync(exists: boolean) {
 }
 
 afterEach(() => {
-    jest.restoreAllMocks();
+  jest.restoreAllMocks();
 });
 
 describe("File System Storage", () => {
