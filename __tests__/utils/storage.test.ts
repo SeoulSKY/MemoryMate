@@ -1,6 +1,6 @@
 import * as DeviceStorage from "expo-file-system";
-import {describe, expect, it, afterEach, jest} from '@jest/globals';
-import {spyOn} from "jest-mock"
+import {describe, expect, it, afterEach, jest} from "@jest/globals";
+import {spyOn} from "jest-mock";
 import {FileSystem} from "../../src/utils/storage";
 import {InvalidArgumentError} from "../../src/utils/error";
 
