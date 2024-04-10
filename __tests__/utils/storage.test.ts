@@ -71,4 +71,19 @@ describe("File System Storage", () => {
       await fs.set(filePath, "test");
     });
   });
+
+  describe("delete", () => {
+    it("should throw InvalidArgumentError when the file doesn't exist", async () => {
+      const fs = new FileSystem();
+      await mockHas(fs, false);
+
+      await expect(() => fs.delete(filePath)).rejects.toThrow(InvalidArgumentError);
+    });
+
+    it("should delete the file if it exists", async () => {
+      const fs = new FileSystem();
+      await mockHas(fs, true);
+      await fs.delete(filePath);
+    });
+  });
 });
