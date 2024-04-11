@@ -1,9 +1,7 @@
-import {Storage, FileSystem} from "./storage";
+import {Storage, FileStorage} from "./storage";
 import {InvalidArgumentError} from "./error";
 
-const profilePath = "profile.json";
-
-enum Gender {
+export enum Gender {
   MALE,
   FEMALE,
   NON_BINARY,
@@ -17,10 +15,12 @@ export interface ProfileData {
 
 export default class Profile {
 
+  private path = "profile.json";
+
   private storage: Storage<string, string>;
 
   constructor() {
-    this.storage = new FileSystem();
+    this.storage = new FileStorage();
   }
 
   /**
@@ -28,7 +28,7 @@ export default class Profile {
    * @returns true if the profile exists, false otherwise
    */
   public async has(): Promise<boolean> {
-    return this.storage.has(profilePath);
+    return this.storage.has(this.path);
   }
 
   /**
@@ -50,10 +50,10 @@ export default class Profile {
       throw new InvalidArgumentError(`Given profile data has an invalid age: ${data.age}`);
     }
 
-    return this.storage.set(profilePath, JSON.stringify(data));
+    return this.storage.set(this.path, JSON.stringify(data));
   }
 
   public async get(): Promise<ProfileData> {
-    return JSON.parse(await this.storage.get(profilePath));
+    return JSON.parse(await this.storage.get(this.path));
   }
 }

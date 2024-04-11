@@ -33,12 +33,12 @@ export interface Storage<K, V> {
   delete(key: K): Promise<void>
 }
 
-export class FileSystem implements Storage<string, string> {
+export class FileStorage implements Storage<string, string> {
 
   private BASE_PATH = documentDirectory!;
 
   /**
-   * Check if the file system has the file
+   * Check if the file storage has the file
    * @param path The path to the file
    * @returns true if the file exists, false otherwise
    */

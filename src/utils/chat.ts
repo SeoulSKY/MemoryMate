@@ -1,6 +1,6 @@
 import {genAI} from "./index";
 
-import {Storage, FileSystem} from "./storage";
+import {Storage, FileStorage} from "./storage";
 import {ChatSession} from "@google/generative-ai";
 import Profile, {ProfileData} from "./profile";
 import {InvalidStateError} from "./error";
@@ -36,7 +36,7 @@ export default class Chat {
 
   constructor() {
     this.session = this.init();
-    this.storage = new FileSystem();
+    this.storage = new FileStorage();
   }
 
   private async init(): Promise<ChatSession> {
