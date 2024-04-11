@@ -1,6 +1,8 @@
 # MemoryMate
 
 <img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/eslint.yml/badge.svg" alt="eslint">
+<img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/jest.yml/badge.svg" alt="jest">
+
 
 ## How to Set up and Run
 
@@ -10,9 +12,17 @@ Create a `.env` file, copy and paste all contents from the `.env.example` file, 
 
 ### Description of each environment variable
 
-| Name                     | Description                                                             |
-|--------------------------|-------------------------------------------------------------------------|
+| Name                     | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
 | EXPO_PUBLIC_GEMINI_TOKEN | [Token](https://aistudio.google.com/app/apikey) for using the Gemini AI API |
+
+### Installing Dependencies
+
+Run the following command:
+
+```bash
+npm install
+```
 
 ### For Android
 
