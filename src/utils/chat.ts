@@ -88,7 +88,8 @@ export default class Chat {
 
     const timestamp = new Date();
 
-    const response= (await this.session.sendMessage(message)).response.text();
+    const response= (await this.session.sendMessage(`${message}\nTime sent: ${timestamp.toISOString()}`))
+      .response.text();
 
     const history = await this.hasHistory() ? await this.getHistory() : [];
     history.push({author: Author.USER, text: message, timestamp: new Date()});
