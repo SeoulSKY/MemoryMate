@@ -2,7 +2,7 @@ import {describe, expect, it, beforeEach} from "@jest/globals";
 
 import {MockStorage} from "../index";
 import Profile, {Gender, ProfileData} from "../../src/utils/profile";
-import {InvalidArgumentError} from "../../src/utils/error";
+import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
 
 const mockProfileData: ProfileData = {
   name: "test",
@@ -11,17 +11,15 @@ const mockProfileData: ProfileData = {
 };
 
 describe("Profile", () => {
-  const profile = new Profile();
+  const profile = Profile.getInstance();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const path = (profile as any).path;
+  const path = Profile["path"];
   let storage: MockStorage<string, string>;
 
   beforeEach(() => {
     storage = new MockStorage();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (profile as any).storage = storage;
+    profile["storage"] = storage;
   });
 
   describe("has", () => {
@@ -66,6 +64,10 @@ describe("Profile", () => {
   });
 
   describe("get", () => {
+    it("should throw InvalidStateError when the profile does not exist", async () => {
+      await expect(profile.get()).rejects.toThrow(InvalidStateError);
+    });
+
     it("should return the profile", async () => {
       await storage.set(path, JSON.stringify(mockProfileData));
 

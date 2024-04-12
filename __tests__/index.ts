@@ -24,7 +24,7 @@ export class MockStorage<K, V> implements Storage<K, V> {
 
   public async delete(key: K): Promise<void> {
     if (!this.data.delete(key)) {
-      throw new Error(`Key does not exist: ${key}`);
+      throw new InvalidArgumentError(`Key does not exist: ${key}`);
     }
   }
 }

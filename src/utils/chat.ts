@@ -3,21 +3,20 @@ import {genAI} from "./index";
 import {Storage, FileStorage} from "./storage";
 import {ChatSession} from "@google/generative-ai";
 import Profile, {ProfileData} from "./profile";
-import {InvalidStateError} from "./error";
+import {InvalidArgumentError, InvalidStateError} from "./error";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 // const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"})
 
-const historyPath = "chatHistory.json";
-
-enum Author {
+export enum Author {
   USER,
   BOT,
 }
 
-export interface ChatHistory {
+export interface Message {
   author: Author;
-  message: string;
+  text: string;
+  timestamp: Date;
 }
 
 function getInstruction(profile: ProfileData): string {
@@ -31,44 +30,69 @@ function getInstruction(profile: ProfileData): string {
 }
 
 export default class Chat {
-  private readonly session: Promise<ChatSession>;
-  private storage: Storage<string, string>;
 
-  constructor() {
-    this.session = this.init();
-    this.storage = new FileStorage();
-  }
+  private static instance: Chat;
 
-  private async init(): Promise<ChatSession> {
-    const profile = new Profile();
-    if (!await profile.has()) {
+  private static readonly historyPath = "chatHistory.json";
+
+  // @ts-expect-error it will be assigned in getInstance()
+  public storage: Storage<string, string>;
+
+  // @ts-expect-error it will be assigned in getInstance()
+  private session: ChatSession;
+
+  private constructor() {}
+
+  /**
+   * Get the chat instance
+   * @returns The chat instance
+   * @throws {InvalidStateError} If the profile does not exist
+   */
+  public static async getInstance(storageType: new () => Storage<string, string> = FileStorage): Promise<Chat> {
+    if (this.instance !== undefined) {
+      return this.instance;
+    }
+
+    if (!await Profile.getInstance().has()) {
       throw new InvalidStateError("Profile does not exist");
     }
 
-    const history = (await this.getHistory())
-      .map(history => {
-        return {role: history.author === Author.USER ? "user" : "model", parts: [{text: history.message}]};
-      });
+    this.instance = new Chat();
+    this.instance.storage = new storageType();
 
-    // Always include the instruction at the beginning of the history
-    history.unshift({role: "model", parts: [{text: getInstruction(await profile.get())}]});
+    const history = [
+      {role: "user", parts: [{text: getInstruction(await Profile.getInstance().get())}]}
+    ];
 
-    return model.startChat({history: history});
+    if (await this.instance.hasHistory()) {
+      for (const message of await this.instance.getHistory()) {
+        history.push({role: message.author === Author.USER ? "user" : "model", parts: [{text: message.text}]});
+      }
+    }
+
+    this.instance.session = model.startChat({history: history});
+
+    return this.instance;
   }
 
   /**
    * Send a message to the chatbot
    * @param message The message to send
+   * @throws {InvalidArgumentError} If the message is empty
    */
   public async sendMessage(message: string): Promise<string> {
-    const session = await this.session;
+    if (message.trim() === "") {
+      throw new InvalidArgumentError("Message cannot be empty");
+    }
 
-    const response= (await session.sendMessage(message)).response.text();
+    const timestamp = new Date();
 
-    const history = await this.getHistory();
-    history.push({author: Author.USER, message: message});
-    history.push({author: Author.BOT, message: response});
-    await this.save();
+    const response= (await this.session.sendMessage(message)).response.text();
+
+    const history = await this.hasHistory() ? await this.getHistory() : [];
+    history.push({author: Author.USER, text: message, timestamp: new Date()});
+    history.push({author: Author.BOT, text: response, timestamp});
+    await this.save(history);
 
     return response;
   }
@@ -78,7 +102,7 @@ export default class Chat {
    * @returns true if the chat history exists, false otherwise
    */
   public async hasHistory(): Promise<boolean> {
-    return this.storage.has(historyPath);
+    return this.storage.has(Chat.historyPath);
   }
 
   /**
@@ -86,12 +110,18 @@ export default class Chat {
    * @returns The chat history
    * @throws {InvalidArgumentError} If the chat history does not exist
    */
-  public async getHistory(): Promise<ChatHistory[]> {
+  public async getHistory(): Promise<Message[]> {
     if (!await this.hasHistory()) {
       throw new InvalidStateError("Chat history does not exist");
     }
 
-    return JSON.parse(await this.storage.get(historyPath));
+    return JSON.parse(await this.storage.get(Chat.historyPath), (key, value) => {
+      if (key === "timestamp") {
+        return new Date(value);
+      }
+
+      return value;
+    });
   }
 
   /**
@@ -103,10 +133,16 @@ export default class Chat {
       throw new InvalidStateError("Chat history does not exist");
     }
 
-    return this.storage.delete(historyPath);
+    return this.storage.delete(Chat.historyPath);
   }
 
-  private async save(): Promise<void> {
-    return this.storage.set(historyPath, JSON.stringify(history));
+  private async save(history: Message[]): Promise<void> {
+    return this.storage.set(Chat.historyPath, JSON.stringify(history, (_, value) => {
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+
+      return value;
+    }));
   }
 }

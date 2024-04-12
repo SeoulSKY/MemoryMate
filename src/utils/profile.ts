@@ -1,5 +1,5 @@
 import {Storage, FileStorage} from "./storage";
-import {InvalidArgumentError} from "./error";
+import {InvalidArgumentError, InvalidStateError} from "./error";
 
 export enum Gender {
   MALE,
@@ -15,12 +15,27 @@ export interface ProfileData {
 
 export default class Profile {
 
-  private path = "profile.json";
+  private static instance: Profile;
+  private static readonly path = "profile.json";
 
+  // @ts-expect-error it will be assigned in getInstance()
   private storage: Storage<string, string>;
 
-  constructor() {
-    this.storage = new FileStorage();
+  private constructor() {}
+
+  /**
+   * Get the profile instance
+   * @returns The profile instance
+   */
+  public static getInstance(storageType: new () => Storage<string, string> = FileStorage): Profile {
+    if (this.instance !== undefined) {
+      return this.instance;
+    }
+
+    this.instance = new Profile();
+    this.instance.storage = new storageType();
+
+    return this.instance;
   }
 
   /**
@@ -28,7 +43,7 @@ export default class Profile {
    * @returns true if the profile exists, false otherwise
    */
   public async has(): Promise<boolean> {
-    return this.storage.has(this.path);
+    return this.storage.has(Profile.path);
   }
 
   /**
@@ -50,10 +65,19 @@ export default class Profile {
       throw new InvalidArgumentError(`Given profile data has an invalid age: ${data.age}`);
     }
 
-    return this.storage.set(this.path, JSON.stringify(data));
+    return this.storage.set(Profile.path, JSON.stringify(data));
   }
 
+  /**
+   * Get the profile data
+   * @returns The profile data
+   * @throws {InvalidStateError} If the profile does not exist
+   */
   public async get(): Promise<ProfileData> {
-    return JSON.parse(await this.storage.get(this.path));
+    if (!await this.has()) {
+      throw new InvalidStateError("Profile does not exist");
+    }
+
+    return JSON.parse(await this.storage.get(Profile.path));
   }
 }
