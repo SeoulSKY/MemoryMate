@@ -1,7 +1,10 @@
 # MemoryMate
 
-<img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/eslint.yml/badge.svg" alt="eslint">
-<img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/jest.yml/badge.svg" alt="jest">
+<div align="center">
+    <img src="https://img.shields.io/badge/Node.js-v21.7-84ba64" alt="nodejs">
+    <img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/eslint.yml/badge.svg" alt="eslint">
+    <img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/jest.yml/badge.svg" alt="jest">
+</div>
 
 
 ## How to Set up and Run
