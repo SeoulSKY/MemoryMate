@@ -110,7 +110,7 @@ describe("Chat", () => {
       expect(await storage.has(historyPath)).toBe(false);
     });
 
-    it("should throw an error when the chat history does not exist", async () => {
+    it("should throw InvalidStateError when the chat history does not exist", async () => {
       await expect(chat.deleteHistory()).rejects.toThrow(InvalidStateError);
     });
   });
