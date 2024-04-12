@@ -78,6 +78,7 @@ export default class Chat {
   /**
    * Send a message to the chatbot
    * @param message The message to send
+   * @returns The response from the chatbot
    * @throws {InvalidArgumentError} If the message is empty
    */
   public async sendMessage(message: string): Promise<string> {
