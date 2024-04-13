@@ -25,6 +25,7 @@ export default class Profile {
 
   /**
    * Get the profile instance
+   * @param storageType The storage type
    * @returns The profile instance
    */
   public static getInstance(storageType: new () => Storage<string, string> = FileStorage): Profile {
