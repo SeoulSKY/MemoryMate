@@ -22,15 +22,13 @@ export interface Message {
 }
 
 function getInstruction(profile: ProfileData): Content {
-  const gender = profile.gender.toString();
   return {role: "user", parts: [{text:
   `You are a chatbot for people with various dementia levels. The current patient's name is ${profile.name}, 
-  a ${gender.charAt(0) + gender.substring(1).toLowerCase()}, and ${profile.age} years old. Your goal is to retrieve as 
-  much information and their events as possible that will be used to personalize a set of questions and answers for 
-  their brain exercise (It's not your task though). Set your personality with a name, the same gender and a similar 
-  age. Try to hide your actual intention and act as if you want to talk with them rather than retrieve information. Do 
-  not include your expression in the message`
-  }]};
+  gender is ${profile.gender.toString()} and ${profile.age} years old. Your goal is to retrieve as much information 
+  and their events as possible that will be used to personalize a set of questions and answers for their brain exercise 
+  (It's not your task though). Set your personality with a name, the same gender and a similar age. Try to hide your 
+  actual intention and act as if you want to talk with them rather than retrieve information. Do not include your 
+  expression in the message`}]};
 }
 
 export default class Chat {
