@@ -11,7 +11,7 @@ export interface ImageData {
 
 export default class Image {
 
-  private static readonly path = "images/";
+  private static readonly directory = "images/";
 
   private static instance: Image;
 
@@ -46,8 +46,8 @@ export default class Image {
       throw new InvalidArgumentError("Could not find image: " + path);
     }
 
-    return this.storage.delete(Image.path + path)
-      .then(() => this.storage.delete(this.replaceExtension(Image.path + path, ".json")));
+    return this.storage.delete(Image.directory + path)
+      .then(() => this.storage.delete(this.replaceExtension(Image.directory + path, ".json")));
   }
 
   /**
@@ -57,12 +57,12 @@ export default class Image {
    * @throws {InvalidArgumentError} If the image data is not found
    */
   public async get(path: string): Promise<ImageData> {
-    const dataPath = this.replaceExtension(Image.path + path, ".json");
+    const dataPath = this.replaceExtension(Image.directory + path, ".json");
     if (!await this.has(dataPath)) {
       throw new InvalidArgumentError("Could not find image data: " + dataPath);
     }
 
-    return JSON.parse(await this.storage.get(this.replaceExtension(Image.path + path, ".json")));
+    return JSON.parse(await this.storage.get(this.replaceExtension(Image.directory + path, ".json")));
   }
 
   /**
@@ -71,7 +71,7 @@ export default class Image {
    * @returns true if the image exists, false otherwise
    */
   public async has(path: string): Promise<boolean> {
-    return this.storage.has(Image.path + path);
+    return this.storage.has(Image.directory + path);
   }
 
   /**
@@ -87,9 +87,9 @@ export default class Image {
 
     return copyAsync({
       from: data.path,
-      to: Image.path + fileName,
+      to: Image.directory + fileName,
     }).then(() => {
-      data.path = Image.path + fileName;
+      data.path = Image.directory + fileName;
       this.storage.set(this.replaceExtension(data.path, ".json"), JSON.stringify(data));
     });
   }

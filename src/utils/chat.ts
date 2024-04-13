@@ -21,6 +21,10 @@ export interface Message {
   timestamp: Date;
 }
 
+/**
+ * Get the instruction for the chatbot
+ * @param profile The user profile data
+ */
 function getInstruction(profile: ProfileData): Content {
   return {role: "user", parts: [{text:
   `You are a chatbot for people with various dementia levels. The current patient's name is ${profile.name}, 
@@ -174,7 +178,7 @@ export default class Chat {
       };
     }));
 
-    return visionModel.generateContent(["describe these images", ...imgs])
+    return visionModel.generateContent(["Describe these images", ...imgs])
       .then(result => result.response.text());
   }
 
