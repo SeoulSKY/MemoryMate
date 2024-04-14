@@ -8,9 +8,9 @@ export const FontFamily = {
     nunitoBlack: "Nunito-Black",
     gothicA1ExtraBold: "GothicA1-ExtraBold",
     gothicA1Light: "GothicA1-Light",
-  };
+};
   /* font sizes */
-  export const FontSize = {
+export const FontSize = {
     size_5xl: 24,
     size_24xl: 43,
     size_xl: 20,
@@ -20,9 +20,9 @@ export const FontFamily = {
     size_12xl_7: 32,
     size_sm: 14,
     size_13xl: 32,
-  };
+};
   /* Colors */
-  export const Color = {
+export const Color = {
     colorWhite: "#fff",
     colorMediumpurple: "#a475c1",
     colorGray_100: "#797c7b",
@@ -33,9 +33,9 @@ export const FontFamily = {
     colorBlack: "#000",
     colorDarkslategray: "#383d54",
     colorLightgray: "#cdd1d0",
-  };
+};
   /* Paddings */
-  export const Padding = {
+export const Padding = {
     p_sm: 14,
     p_smi: 13,
     p_3xs: 10,
@@ -45,14 +45,14 @@ export const FontFamily = {
     p_21xl: 40,
     p_6xl: 25,
     p_16xl: 35,
-  };
+};
   /* border radiuses */
-  export const Border = {
+export const Border = {
     br_mini: 15,
     br_10xs_7: 3,
     br_11xs_3: 1,
     br_12xl: 31,
     br_5xs: 8,
     br_81xl: 100,
-  };
+};
   
