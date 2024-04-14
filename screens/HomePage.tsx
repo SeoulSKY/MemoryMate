@@ -1,77 +1,107 @@
 import * as React from "react";
-import { Image } from "expo-image";
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
 
-const HomePage = () => {
+const Home = () => {
   return (
-    <View style={styles.homePage}>
-     
-      <Image
-        style={[styles.homepagescreenIcon, styles.iconLayout]}
-        contentFit="cover"
-        source={require("../assets/homepagescreen.png")}
-      />
-      
-      <View style={[styles.statusBar, styles.statusBarPosition]}>
-        <View style={styles.frame}>
-          <View style={[styles.frame1, styles.textPosition]}>
-            <Text style={[styles.text, styles.textFlexBox]}>9:41</Text>
-          </View>
-          <Image
-            style={styles.excludeIcon}
-            contentFit="cover"
-            source={require("../assets/exclude.png")}
-          />
-        </View>
-        <View style={styles.frame2}>
-          <View style={[styles.frame3, styles.frame3Position]}>
+    <View style={[styles.home, styles.homeLayout]}>
+      <View style={[styles.homePage, styles.homePagePosition]}>
+        <Image
+          style={[styles.homePageChild, styles.homePosition]}
+          resizeMode="cover"
+          source={require("../assets/ellipse-1227.png")}
+        />
+        <Image
+          style={[styles.homepagescreenIcon, styles.iconLayout]}
+          resizeMode="cover"
+          source={require("../assets/HomePageImg.png")}
+        />
+        <Image
+          style={[styles.homePageItem, styles.homePosition]}
+          resizeMode="cover"
+        />
+        <View style={[styles.statusBar, styles.homePagePosition]}>
+          <View style={styles.frame}>
+            <View style={[styles.frame1, styles.textPosition]}>
+              <Text style={[styles.text, styles.textFlexBox]}>9:41</Text>
+            </View>
             <Image
-              style={[styles.vectorIcon, styles.frame3Position]}
-              contentFit="cover"
-              source={require("../assets/vector.png")}
+              style={styles.excludeIcon}
+              resizeMode="cover"
+              source={require("../assets/exclude.png")}
             />
-            <View style={styles.rectangle} />
           </View>
-          <Image
-            style={styles.excludeIcon1}
-            contentFit="cover"
-            source={require("../assets/exclude1.png")}
-          />
+          <View style={styles.frame2}>
+            <View style={styles.frame3}>
+              <Image
+                style={[styles.vectorIcon, styles.iconLayout]}
+                resizeMode="cover"
+                source={require("../assets/vector.png")}
+              />
+              <View style={styles.rectangle} />
+            </View>
+            <Image
+              style={styles.excludeIcon1}
+              resizeMode="cover"
+              source={require("../assets/exclude1.png")}
+            />
+          </View>
         </View>
-      </View>
-      <View style={styles.back} />
-      <Pressable style={styles.btnstart}>
-        <Text
-          style={[styles.letsGetStarted, styles.memoryMateTypo]}
-        >{`Let's get started!    `}</Text>
-      </Pressable>
-      <View style={[styles.title, styles.titleSpaceBlock]}>
-        <Text style={[styles.memoryMate, styles.memoryMateTypo]}>
-          Memory Mate
-        </Text>
-      </View>
-      <View style={[styles.description, styles.titleSpaceBlock]}>
-        <Text
-          style={[styles.feelingForgetfulNeed, styles.textFlexBox]}
-        >{`Feeling forgetful? Need a chat buddy?
+        <View style={styles.back} />
+        <TouchableOpacity
+          style={styles.btnstart}
+          activeOpacity={0.2}
+          onPress={() => {}}
+        >
+          <Text
+            style={[styles.letsGetStarted, styles.memoryMateTypo]}
+          >{`Let's get started!    `}</Text>
+        </TouchableOpacity>
+        <View style={[styles.title, styles.titleSpaceBlock]}>
+          <Text style={[styles.memoryMate, styles.memoryMateTypo]}>
+            Memory Mate
+          </Text>
+        </View>
+        <View style={[styles.description, styles.titleSpaceBlock]}>
+          <Text
+            style={[styles.feelingForgetfulNeed, styles.textFlexBox]}
+          >{`Feeling forgetful? Need a chat buddy?
 
 Chat with our friendly and helpful AI companion designed specifically for those living with dementia. 
 
 Play brain games to keep your mind sharp.`}</Text>
-      </View>
-      <View style={styles.memorymatelogo}>
-        <Image
-          style={styles.groupIcon}
-          contentFit="cover"
-          source={require("../assets/group.png")}
-        />
+        </View>
+        <View style={styles.memorymatelogo}>
+          <Image
+            style={styles.groupIcon}
+            resizeMode="cover"
+            source={require("../assets/group.png")}
+          />
+        </View>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  homeLayout: {
+    height: 812,
+    overflow: "hidden",
+    backgroundColor: Color.colorWhite,
+  },
+  homePagePosition: {
+    width: 375,
+    left: 0,
+    top: 0,
+    position: "absolute",
+  },
   homePosition: {
     opacity: 0.63,
     position: "absolute",
@@ -79,12 +109,8 @@ const styles = StyleSheet.create({
   iconLayout: {
     maxHeight: "100%",
     maxWidth: "100%",
-    overflow: "hidden",
-  },
-  statusBarPosition: {
-    left: 0,
-    top: 0,
     position: "absolute",
+    overflow: "hidden",
   },
   textPosition: {
     left: "0%",
@@ -93,10 +119,6 @@ const styles = StyleSheet.create({
   textFlexBox: {
     textAlign: "center",
     color: Color.colorWhite,
-  },
-  frame3Position: {
-    right: "0%",
-    position: "absolute",
   },
   memoryMateTypo: {
     fontWeight: "700",
@@ -119,7 +141,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     top: 0,
-    position: "absolute",
+    maxWidth: "100%",
   },
   homePageItem: {
     top: -233,
@@ -130,7 +152,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: -4.5,
-    width: "100%",
     top: "50%",
     fontSize: FontSize.size_mini,
     letterSpacing: 0,
@@ -139,6 +160,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.robotoMedium,
     left: "0%",
     position: "absolute",
+    width: "100%",
   },
   frame1: {
     height: "98.59%",
@@ -163,20 +185,18 @@ const styles = StyleSheet.create({
     height: "36.36%",
     width: "5.45%",
     top: "36.36%",
+    right: "-0.07%",
     bottom: "27.27%",
-    left: "94.55%",
+    left: "94.61%",
     opacity: 0.4,
-    maxHeight: "100%",
-    maxWidth: "100%",
-    overflow: "hidden",
   },
   rectangle: {
     height: "63.64%",
     width: "73.18%",
     top: "18.18%",
-    right: "18.64%",
+    right: "18.71%",
     bottom: "18.18%",
-    left: "8.18%",
+    left: "8.11%",
     borderRadius: 1,
     position: "absolute",
     backgroundColor: Color.colorWhite,
@@ -184,13 +204,15 @@ const styles = StyleSheet.create({
   frame3: {
     height: "97.35%",
     width: "52.38%",
+    right: "0%",
     bottom: "2.65%",
     left: "47.62%",
     borderRadius: 3,
     borderStyle: "solid",
-    borderColor: Color.colorGray_300,
+    borderColor: Color.colorGray,
     borderWidth: 1,
     top: "0%",
+    position: "absolute",
   },
   excludeIcon1: {
     width: 15,
@@ -206,7 +228,6 @@ const styles = StyleSheet.create({
   },
   statusBar: {
     height: 44,
-    width: 375,
   },
   back: {
     top: 133,
@@ -288,11 +309,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
     shadowOpacity: 1,
-    height: 812,
     overflow: "hidden",
-    width: 375,
+    height: 812,
     backgroundColor: Color.colorWhite,
+  },
+  home: {
+    flex: 1,
+    overflow: "hidden",
+    width: "100%",
   },
 });
 
-export default HomePage;
+export default Home;
