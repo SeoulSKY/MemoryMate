@@ -9,13 +9,13 @@ import Image, {ImageData} from "./image";
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
 
-export enum Author {
+export enum Participant {
   USER,
   BOT,
 }
 
 export interface Message {
-  author: Author;
+  author: Participant;
   text: string;
   images: ImageData[];
   timestamp: Date;
@@ -73,7 +73,7 @@ export default class Chat {
 
     if (await this.instance.hasHistory()) {
       for (const message of await this.instance.getHistory()) {
-        history.push({role: message.author === Author.USER ? "user" : "model", parts: [{text: message.text}]});
+        history.push({role: message.author === Participant.USER ? "user" : "model", parts: [{text: message.text}]});
       }
     }
 
@@ -96,6 +96,8 @@ export default class Chat {
 
     const timestamp = new Date();
 
+    images = await Promise.all(images.map(image => Image.getInstance().save(image)));
+
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
@@ -103,8 +105,8 @@ export default class Chat {
     const response= (await this.session.sendMessage(prompt)).response.text();
 
     const history = await this.hasHistory() ? await this.getHistory() : [];
-    history.push({author: Author.USER, text: message, images, timestamp});
-    history.push({author: Author.BOT, text: response, images: [], timestamp: new Date()});
+    history.push({author: Participant.USER, text: message, images, timestamp});
+    history.push({author: Participant.BOT, text: response, images: [], timestamp: new Date()});
     await this.save(history);
 
     return history.pop()!;

@@ -43,7 +43,7 @@ export default class Image {
    */
   public async delete(path: string): Promise<void> {
     if (!await this.has(path)) {
-      throw new InvalidArgumentError("Could not find image: " + path);
+      throw new InvalidArgumentError("Could not find image: " + Image.directory + path);
     }
 
     return this.storage.delete(Image.directory + path)
@@ -57,7 +57,7 @@ export default class Image {
    * @throws {InvalidArgumentError} If the image data is not found
    */
   public async get(path: string): Promise<ImageData> {
-    const dataPath = this.replaceExtension(Image.directory + path, ".json");
+    const dataPath = this.replaceExtension(path, ".json");
     if (!await this.has(dataPath)) {
       throw new InvalidArgumentError("Could not find image data: " + dataPath);
     }
@@ -77,11 +77,12 @@ export default class Image {
   /**
    * Save the image from the galley to the storage
    * @param data The image data
+   * @returns The new image data
    * @throws {InvalidArgumentError} If the image path is invalid
    */
-  public async save(data: ImageData): Promise<void> {
+  public async save(data: ImageData): Promise<ImageData> {
     const fileName = data.path.split("/").pop();
-    if (fileName === undefined) {
+    if (fileName === undefined || fileName.trim() == "" || !this.isImage(fileName)) {
       throw new InvalidArgumentError("Invalid image path");
     }
 
@@ -89,8 +90,8 @@ export default class Image {
       from: data.path,
       to: Image.directory + fileName,
     }).then(() => {
-      data.path = Image.directory + fileName;
-      this.storage.set(this.replaceExtension(data.path, ".json"), JSON.stringify(data));
+      this.storage.set(this.replaceExtension(Image.directory + fileName, ".json"), JSON.stringify(data));
+      return {...data, path: fileName};
     });
   }
 
@@ -98,9 +99,23 @@ export default class Image {
    * Load the image from the storage into a base64 string
    * @param data The image data
    * @returns The base64 string of the image
+   * @throws {InvalidArgumentError} If the image is not found
    */
   public async load(data: ImageData): Promise<string> {
-    return Buffer.from(await this.storage.get(data.path)).toString("base64");
+    if (!await this.has(data.path)) {
+      throw new InvalidArgumentError("Could not find image: " + data.path);
+    }
+
+    return Buffer.from(await this.storage.get(Image.directory + data.path)).toString("base64");
+  }
+
+  /**
+   * Check if the path is an image
+   * @param path The path to the image
+   * @returns true if the path is an image, false otherwise
+   */
+  private isImage(path: string): boolean {
+    return path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".gif");
   }
 
   /**

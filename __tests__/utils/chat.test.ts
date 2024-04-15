@@ -3,7 +3,7 @@ import {spyOn} from "jest-mock";
 
 import {MockStorage} from "../index";
 
-import Chat, {Author, Message} from "../../src/utils/chat";
+import Chat, {Participant, Message} from "../../src/utils/chat";
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
 import Profile, {Gender} from "../../src/utils/profile";
 import {ImageData} from "../../src/utils/image";
@@ -15,8 +15,8 @@ const mockImages: ImageData[] = [
 ];
 
 const mockChatHistory: Message[] = [
-  {author: Author.USER, text: "request", images: mockImages, timestamp: new Date("1970-01-01T00:00:00Z")},
-  {author: Author.BOT, text: "response", images: [], timestamp: new Date("1970-01-01T00:00:01Z")},
+  {author: Participant.USER, text: "request", images: mockImages, timestamp: new Date("1970-01-01T00:00:00Z")},
+  {author: Participant.BOT, text: "response", images: [], timestamp: new Date("1970-01-01T00:00:01Z")},
 ];
 
 const stringMockChatHistory = JSON.stringify(mockChatHistory, (key, value) => {
@@ -75,14 +75,14 @@ describe("Chat", () => {
     it("should send a message without images and return the response", async () => {
       const response = await chat.sendMessage("request");
 
-      expect(response).toEqual({author: Author.BOT, text: "response", images: expect.any(Array),
+      expect(response).toEqual({author: Participant.BOT, text: "response", images: expect.any(Array),
         timestamp: expect.any(Date)});
     });
 
     it("should send a message with images and return the response", async () => {
       const response = await chat.sendMessage("request", mockImages);
 
-      expect(response).toEqual({author: Author.BOT, text: "response", images: expect.any(Array),
+      expect(response).toEqual({author: Participant.BOT, text: "response", images: expect.any(Array),
         timestamp: expect.any(Date)});
     });
   });
