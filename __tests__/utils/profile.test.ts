@@ -82,7 +82,7 @@ describe("Bot Profile", () => {
   const botProfile = BotProfile.getInstance();
 
   const path = BotProfile["path"];
-  const profileDirectory = BotProfile["profileDirectory"];
+  const profileDirectory = BotProfile["profileImageDirectory"];
   let storage: MockStorage<string, string>;
 
   beforeEach(() => {

@@ -121,7 +121,7 @@ export class BotProfile extends Profile {
 
   private static instance: BotProfile;
 
-  private static readonly profileDirectory = "assets/profiles/";
+  private static readonly profileImageDirectory = "assets/profiles/";
 
   private static readonly path = "botProfile.json";
 
@@ -163,7 +163,7 @@ export class BotProfile extends Profile {
     const newData: ProfileData = {
       ...data,
       image: {
-        path: `${BotProfile.profileDirectory}${data.gender.toString()}/${age}_${this.getRandomInt(0, BotProfile.numImages)}.png`,
+        path: `${BotProfile.profileImageDirectory}${data.gender.toString()}/${age}_${this.getRandomInt(0, BotProfile.numImages)}.png`,
         width: 256,
         height: 256,
         mimeType: "image/png",
