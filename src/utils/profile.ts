@@ -3,8 +3,8 @@ import {InvalidArgumentError, InvalidStateError} from "./error";
 import {ImageData} from "./image";
 
 export enum Participant {
-  USER,
-  BOT,
+  USER = "user",
+  BOT = "bot",
 }
 
 export enum Gender {
