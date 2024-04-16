@@ -2,17 +2,12 @@ import {genAI} from "./index";
 
 import {Storage, FileStorage} from "./storage";
 import {ChatSession, Content} from "@google/generative-ai";
-import Profile, {ProfileData} from "./profile";
+import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
 import {InvalidArgumentError, InvalidStateError} from "./error";
 import Image, {ImageData} from "./image";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
-
-export enum Participant {
-  USER,
-  BOT,
-}
 
 export interface Message {
   author: Participant;
@@ -23,16 +18,17 @@ export interface Message {
 
 /**
  * Get the instruction for the chatbot
- * @param profile The user profile data
+ * @param bot The bot profile data
+ * @param user The user profile data
  */
-function getInstruction(profile: ProfileData): Content {
+function getInstruction(bot: ProfileData, user: ProfileData): Content {
   return {role: "user", parts: [{text:
-  `You are a chatbot for people with various dementia levels. The current patient's name is ${profile.name}, 
-  gender is ${profile.gender.toString()} and ${profile.age} years old. Your goal is to retrieve as much information 
+  `You are a chatbot for people with various dementia levels. The current patient's name is ${user.name}, 
+  gender is ${user.gender.toString()} and ${user.age} years old. Your goal is to retrieve as much information 
   and their events as possible that will be used to personalize a set of questions and answers for their brain exercise 
-  (It's not your task though). Set your personality with a name, the same gender and a similar age. Try to hide your 
-  actual intention and act as if you want to talk with them rather than retrieve information. Do not include your 
-  expression in the message`}]};
+  (It's not your task though). Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an 
+  age ${bot.age}. Try to hide your actual intention and act as if you want to talk with them rather than retrieve 
+  information. Do not include your expression in the message`}]};
 }
 
 export default class Chat {
@@ -53,22 +49,26 @@ export default class Chat {
    * Get the chat instance
    * @param storageType The storage type
    * @returns The chat instance
-   * @throws {InvalidStateError} If the profile does not exist
+   * @throws {InvalidStateError} If either bot or user profile does not exist
    */
   public static async getInstance(storageType: new () => Storage<string, string> = FileStorage): Promise<Chat> {
     if (this.instance !== undefined) {
       return this.instance;
     }
 
-    if (!await Profile.getInstance().has()) {
-      throw new InvalidStateError("Profile does not exist");
+    if (!await BotProfile.getInstance().has()) {
+      throw new InvalidStateError("Bot profile does not exist");
+    }
+
+    if (!await UserProfile.getInstance().has()) {
+      throw new InvalidStateError("User profile does not exist");
     }
 
     this.instance = new Chat();
     this.instance.storage = new storageType();
 
     const history = [
-      getInstruction(await Profile.getInstance().get())
+      getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
     ];
 
     if (await this.instance.hasHistory()) {
@@ -96,7 +96,7 @@ export default class Chat {
 
     const timestamp = new Date();
 
-    images = await Promise.all(images.map(image => Image.getInstance().save(image)));
+    images = await Promise.all(images.map(image => Image.getInstance().copyFromGallery(image)));
 
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
@@ -154,9 +154,10 @@ export default class Chat {
         .filter(path => Image.getInstance().has(path))
         .forEach(path => Image.getInstance().delete(path))
     ).then(() => this.storage.delete(Chat.historyPath))
-      .then(() => Profile.getInstance().get())
-      .then(profile => {
-        this.session = model.startChat({history: [getInstruction(profile)]});
+      .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
+      .then(async profiles => {
+        const [bot, user] = await Promise.all(profiles);
+        this.session = model.startChat({history: [getInstruction(bot, user)]});
       });
   }
 

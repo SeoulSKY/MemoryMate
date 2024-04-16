@@ -72,13 +72,13 @@ describe("Image", () => {
     });
   });
 
-  describe("save", () => {
-    it("should save the image", async () => {
+  describe("copyFromGallery", () => {
+    it("should copy the image from gallery", async () => {
       spyOn(FileSystem, "copyAsync").mockImplementation(async () => {
         await storage.set(directory + mockImageData.path, "data");
       });
 
-      await image.save(mockImageData);
+      await image.copyFromGallery(mockImageData);
 
       expect(await storage.get(directory + mockImageData.path)).toBe("data");
       expect(await storage.get(directory + mockImageJsonPath)).toBe(JSON.stringify(mockImageData));
@@ -87,7 +87,7 @@ describe("Image", () => {
     it("should throw InvalidArgumentError if the image path is invalid", async () => {
       const invalidPaths = ["", "image", "image/"];
       for (const path of invalidPaths) {
-        await expect(image.save({...mockImageData, path})).rejects.toThrow(InvalidArgumentError);
+        await expect(image.copyFromGallery({...mockImageData, path})).rejects.toThrow(InvalidArgumentError);
       }
     });
   });

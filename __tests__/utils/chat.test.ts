@@ -3,11 +3,18 @@ import {spyOn} from "jest-mock";
 
 import {MockStorage} from "../index";
 
-import Chat, {Participant, Message} from "../../src/utils/chat";
+import Chat, {Message} from "../../src/utils/chat";
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
-import Profile, {Gender} from "../../src/utils/profile";
+import {UserProfile, BotProfile, Participant, Gender} from "../../src/utils/profile";
 import {ImageData} from "../../src/utils/image";
 import { FunctionCall } from "@google/generative-ai";
+
+const mockProfileData = {
+  image: undefined,
+  name: "test",
+  age: 20,
+  gender: Gender.FEMALE,
+};
 
 const mockImages: ImageData[] = [
   {path: "image1.jpg", width: 0, height: 0, mimeType: "image/jpeg"},
@@ -33,9 +40,11 @@ describe("Chat", () => {
   let storage: MockStorage<string, string>;
 
   beforeAll(async () => {
-    const profile = Profile.getInstance(MockStorage);
-    profile["storage"] = new MockStorage<string, string>();
-    await profile.create({name: "test", age: 20, gender: Gender.MALE});
+    const userProfile = UserProfile.getInstance(MockStorage);
+    const botProfile = BotProfile.getInstance(MockStorage);
+
+    await userProfile.create(mockProfileData);
+    await botProfile.create(mockProfileData);
 
     chat = await Chat.getInstance(MockStorage);
 
