@@ -10,10 +10,10 @@ const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
 
 export interface Message {
-  author: Participant;
-  text: string;
-  images: ImageData[];
-  timestamp: Date;
+  readonly author: Participant;
+  readonly text: string;
+  readonly images: ImageData[];
+  readonly timestamp: Date;
 }
 
 /**
