@@ -4,10 +4,11 @@ import {
   StyleSheet,
   Text,
   View,
-  Pressable,
+  //Pressable,
   TouchableOpacity,
 } from "react-native";
 import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
+
 
 const Home = () => {
   return (
@@ -62,7 +63,7 @@ const Home = () => {
         >
           <Text
             style={[styles.letsGetStarted, styles.memoryMateTypo]}
-          >{`Let's get started!    `}</Text>
+          >{"Let's get started!    "}</Text>
         </TouchableOpacity>
         <View style={[styles.title, styles.titleSpaceBlock]}>
           <Text style={[styles.memoryMate, styles.memoryMateTypo]}>
@@ -137,11 +138,15 @@ const styles = StyleSheet.create({
     height: 414,
   },
   homepagescreenIcon: {
+    
     right: 0,
     bottom: 0,
     left: 0,
     top: 0,
     maxWidth: "100%",
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
   homePageItem: {
     top: -233,
