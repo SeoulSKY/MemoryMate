@@ -5,10 +5,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import Home from "./screens/HomePage";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { View, Text, Pressable, TouchableOpacity } from "react-native";
+//import { View, Text, Pressable, TouchableOpacity } from "react-native";
 
 const App = () => {
-  const [hideSplashScreen, setHideSplashScreen] = React.useState(true);
+  const [hideSplashScreen] = React.useState(true);
 
   return (
     <>
