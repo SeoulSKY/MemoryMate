@@ -1,10 +1,7 @@
 import {copyAsync} from "expo-file-system";
 import {FileStorage, Storage} from "./storage";
-import {HTTPError, InvalidArgumentError} from "./error";
-import OpenAI from "openai";
-import {ProfileData} from "./profile";
-import {ImagesResponse} from "openai/resources";
-import {APIError} from "openai/error";
+import {InvalidArgumentError} from "./error";
+
 
 export interface ImageData {
   readonly path: string,
@@ -38,51 +35,6 @@ export default class Image {
     this.instance.storage = new storageType();
 
     return this.instance;
-  }
-
-  /**
-   * Create a profile image
-   * @param fileName The file name of the image
-   * @param data The profile data
-   * @returns The image data
-   * @throws {HTTPError} If the image generation fails
-   */
-  public async createProfile(fileName: string, data: ProfileData): Promise<ImageData> {
-    const openai = new OpenAI();
-    let image: ImagesResponse;
-
-    try {
-      image = await openai.images.generate({
-        prompt: `A headshot of a friendly person with ${data.age} years old whose gender is ${data.gender}.`,
-        size: "256x256",
-        style: "natural",
-      });
-    } catch (e) {
-      if (e instanceof APIError) {
-        throw new HTTPError(e.message, e.status ? e.status : 500);
-      }
-
-      throw e;
-    }
-
-    const response = await fetch(image.data[0].url!);
-    if (!response.ok) {
-      throw new HTTPError("Failed to download image", response.status);
-    }
-
-    const stringImage = Buffer.from(await response.arrayBuffer()).toString("base64");
-    const imageData: ImageData = {
-      mimeType: "image/png",
-      height: 256,
-      width: 256,
-      path: fileName,
-    };
-
-    await this.storage.set(Image.directory + fileName + ".png", stringImage);
-    await this.storage.set(this.replaceExtension(Image.directory + fileName, ".json"),
-      JSON.stringify(imageData));
-
-    return imageData;
   }
 
   /**
