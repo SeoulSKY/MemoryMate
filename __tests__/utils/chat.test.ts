@@ -40,11 +40,8 @@ describe("Chat", () => {
   let storage: MockStorage<string, string>;
 
   beforeAll(async () => {
-    const userProfile = UserProfile.getInstance(MockStorage);
-    const botProfile = BotProfile.getInstance(MockStorage);
-
-    await userProfile.create(mockProfileData);
-    await botProfile.create(mockProfileData);
+    await UserProfile.getInstance(MockStorage).create(mockProfileData);
+    await BotProfile.getInstance(MockStorage).create(mockProfileData);
 
     chat = await Chat.getInstance(MockStorage);
 
@@ -63,7 +60,7 @@ describe("Chat", () => {
           }
         }});
 
-    // @ts-expect-error private method
+    // @ts-expect-error for testing purposes
     spyOn(chat, "getImageDescriptions").mockResolvedValue(Promise.resolve("image descriptions"));
   });
 

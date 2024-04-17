@@ -11,7 +11,7 @@ const mockImageData: ImageData = {
   path: "image.jpg",
   width: 100,
   height: 100,
-  mimeType: "image/jpg",
+  mimeType: "image/jpeg",
 };
 
 const mockImageJsonPath = mockImageData.path.replace(".jpg", ".json");
@@ -78,7 +78,7 @@ describe("Image", () => {
         await storage.set(directory + mockImageData.path, "data");
       });
 
-      await image.copyFromGallery(mockImageData);
+      await image.saveFromGallery(mockImageData);
 
       expect(await storage.get(directory + mockImageData.path)).toBe("data");
       expect(await storage.get(directory + mockImageJsonPath)).toBe(JSON.stringify(mockImageData));
@@ -87,7 +87,7 @@ describe("Image", () => {
     it("should throw InvalidArgumentError if the image path is invalid", async () => {
       const invalidPaths = ["", "image", "image/"];
       for (const path of invalidPaths) {
-        await expect(image.copyFromGallery({...mockImageData, path})).rejects.toThrow(InvalidArgumentError);
+        await expect(image.saveFromGallery({...mockImageData, path})).rejects.toThrow(InvalidArgumentError);
       }
     });
   });

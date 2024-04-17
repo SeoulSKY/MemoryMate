@@ -1,7 +1,8 @@
 import {FileStorage, Storage} from "./storage";
 import {InvalidStateError} from "./error";
 import {genAI} from "./index";
-import Chat from "./chat";
+import Chat, {Message} from "./chat";
+import {UserProfile} from "./profile";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 
@@ -20,6 +21,9 @@ export abstract class Question<Q, A> {
   protected answer: A | undefined;
 
   protected constructor(question: Q, difficulty: Difficulty, correctAnswer: A) {
+    if (correctAnswer === undefined) {
+      throw new InvalidStateError("Correct answer is undefined");
+    }
     this.question = question;
     this.difficulty = difficulty;
     this.correctAnswer = correctAnswer;
@@ -78,8 +82,12 @@ export abstract class Question<Q, A> {
   /**
    * Check if the answer is correct
    * @returns true if the answer is correct, false otherwise
+   * @throws {InvalidStateError} If the question is not answered
    */
   public isCorrect(): boolean {
+    if (!this.isAnswered()) {
+      throw new InvalidStateError("Question is not answered");
+    }
     return this.answer === this.correctAnswer;
   }
 
@@ -92,7 +100,7 @@ export abstract class Question<Q, A> {
       question: this.question,
       difficulty: this.difficulty,
       correctAnswer: this.correctAnswer,
-      isCorrect: this.isCorrect(),
+      isCorrect: this.isAnswered() ? this.isCorrect() : undefined,
     };
   }
 }
@@ -109,15 +117,15 @@ export class MultipleChoiceQuestion extends Question<string, number> {
 
   /**
    * Set the answer of the question
-   * @param answer The answer
+   * @param choice The answer
    * @throws {InvalidStateError} If the answer choice is invalid
    */
-  public setAnswer(answer: number) {
-    if (!Number.isInteger(answer) || answer < 0 || answer >= this.choices.length) {
-      throw new InvalidStateError("Invalid answer choice: " + answer);
+  public setAnswer(choice: number) {
+    if (!Number.isInteger(choice) || choice < 0 || choice >= this.choices.length) {
+      throw new InvalidStateError("Invalid answer choice: " + choice);
     }
 
-    super.setAnswer(answer);
+    super.setAnswer(choice);
   }
 
   /**
@@ -147,7 +155,7 @@ export default class Quiz {
     this.storage = new storageType();
   }
 
-  public getInstance(storageType: new () => Storage<string, string> = FileStorage): Quiz {
+  public static getInstance(storageType: new () => Storage<string, string> = FileStorage): Quiz {
     if (Quiz.instance !== undefined) {
       return Quiz.instance;
     }
@@ -157,6 +165,11 @@ export default class Quiz {
     return Quiz.instance;
   }
 
+  /**
+   * Create a quiz and save it to the storage
+   * @returns The quiz
+   * @throws {InvalidStateError} If no chat history is found
+   */
   public async create(): Promise<MultipleChoiceQuestion[]> {
     const chatHistory = await (await Chat.getInstance()).getHistory();
 
@@ -164,7 +177,7 @@ export default class Quiz {
       chatHistory: chatHistory.map(message => {
         return {author: message.author, text: message.text};
       }),
-      evaluation: this.evaluate(),
+      evaluation: this.evaluate(chatHistory),
     };
 
     const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
@@ -172,19 +185,20 @@ export default class Quiz {
     from the facts or events extracted by the chat history with the proper mixture of difficulties while considering 
     their dementia level. The entire output must be formatted as a JSON, containing a list of 2 questions with 4 
     choices, its difficulty level between 1 and 3 and an index to the correct choice. The object keys must be question, 
-    difficulty, choices and answer. Do not start your output with \`\`\`json and start with an open square bracket.`;
+    difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open square 
+    bracket.`;
 
     interface Response {
       question: string,
       difficulty: Difficulty,
       choices: string[],
-      correctChoice: number,
+      correctAnswer: number,
     }
 
     const response: Response[] = JSON.parse((await model.generateContent(request)).response.text());
 
     const quiz = response.map(q =>
-      new MultipleChoiceQuestion(q.question, q.difficulty, q.choices, q.correctChoice)
+      new MultipleChoiceQuestion(q.question, q.difficulty, q.choices, q.correctAnswer)
     );
 
     await this.save(quiz);
@@ -195,40 +209,41 @@ export default class Quiz {
    * Evaluate the dementia level of the patient
    * @returns The evaluation
    */
-  private async evaluate(): Promise<string> {
-    const chatHistory = await (await Chat.getInstance()).getHistory();
-
+  private async evaluate(chatHistory: Message[]): Promise<string> {
     const data = {
       chatHistory: chatHistory.map(message => {
         return {author: message.author, text: message.text};
       }),
-      previousQuiz: await this.hasPreviousQuiz() ? await this.getPreviousQuiz() : [],
+      previousQuiz: await this.hasSavedQuiz() ? await this.getSavedQuiz() : [],
     };
+
+    const profile = await UserProfile.getInstance().get();
 
     const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
     result of the previous quiz, try your best to evaluate their dementia level, considering their cognitive abilities, 
-    and behavioural and psychological symptoms. Only explain your evaluations and do not suggest any recommendations or 
-    things to consider.`;
+    and behavioural and psychological symptoms. The patient's age is ${profile.age} and gender is 
+    ${profile.gender.toString()}. Only explain your evaluations and do not suggest any recommendations or things to 
+    consider`;
 
     return (await model.generateContent(request)).response.text();
   }
 
   /**
-   * Check if a previous quiz exists
-   * @returns true if a previous quiz exists, false otherwise
+   * Check if a saved quiz exists
+   * @returns true if a quiz exists, false otherwise
    */
-  private async hasPreviousQuiz(): Promise<boolean> {
+  private async hasSavedQuiz(): Promise<boolean> {
     return this.storage.has(Quiz.path);
   }
 
   /**
-   * Get the previous quiz
-   * @returns The previous quiz
-   * @throws {InvalidStateError} If no previous quiz is found
+   * Get the saved quiz
+   * @returns The quiz
+   * @throws {InvalidStateError} If no quiz is found
    */
-  private async getPreviousQuiz(): Promise<MultipleChoiceQuestion[]> {
-    if (!await this.hasPreviousQuiz()) {
-      throw new InvalidStateError("No previous quiz found");
+  private async getSavedQuiz(): Promise<MultipleChoiceQuestion[]> {
+    if (!await this.hasSavedQuiz()) {
+      throw new InvalidStateError("No saved quiz found");
     }
 
     return JSON.parse(await this.storage.get(Quiz.path));

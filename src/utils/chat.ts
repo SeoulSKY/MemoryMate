@@ -37,13 +37,14 @@ export default class Chat {
 
   private static readonly historyPath = "chatHistory.json";
 
-  // @ts-expect-error it will be assigned in getInstance()
   public storage: Storage<string, string>;
 
   // @ts-expect-error it will be assigned in getInstance()
   private session: ChatSession;
 
-  private constructor() {}
+  private constructor(storageType: new () => Storage<string, string>) {
+    this.storage = new storageType();
+  }
 
   /**
    * Get the chat instance
@@ -64,8 +65,7 @@ export default class Chat {
       throw new InvalidStateError("User profile does not exist");
     }
 
-    this.instance = new Chat();
-    this.instance.storage = new storageType();
+    this.instance = new Chat(storageType);
 
     const history = [
       getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
@@ -96,7 +96,7 @@ export default class Chat {
 
     const timestamp = new Date();
 
-    images = await Promise.all(images.map(image => Image.getInstance().copyFromGallery(image)));
+    images = await Promise.all(images.map(image => Image.getInstance().saveFromGallery(image)));
 
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +

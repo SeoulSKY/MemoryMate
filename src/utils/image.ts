@@ -81,7 +81,7 @@ export default class Image {
    * @returns The new image data
    * @throws {InvalidArgumentError} If the image path is invalid
    */
-  public async copyFromGallery(data: ImageData): Promise<ImageData> {
+  public async saveFromGallery(data: ImageData): Promise<ImageData> {
     const fileName = data.path.split("/").pop();
     if (fileName === undefined || fileName.trim() == "" || !this.isImage(fileName)) {
       throw new InvalidArgumentError("Invalid image path");
