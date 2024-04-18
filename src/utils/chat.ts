@@ -1,9 +1,9 @@
-import {genAI} from "./index";
+import {genAI, parseStatusCode} from "./index";
 
 import {Storage, FileStorage} from "./storage";
 import {ChatSession, Content} from "@google/generative-ai";
 import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
-import {InvalidArgumentError, InvalidStateError} from "./error";
+import {HttpError, InvalidArgumentError, InvalidStateError} from "./error";
 import Image, {ImageData} from "./image";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
@@ -88,6 +88,7 @@ export default class Chat {
    * @param images The images to send
    * @returns The response from the chatbot
    * @throws {InvalidArgumentError} If the message is empty
+   * @throws {HttpError} If failed to send the message
    */
   public async sendMessage(message: string, images: ImageData[] = []): Promise<Message> {
     if (message.trim() === "") {
@@ -101,8 +102,15 @@ export default class Chat {
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
-
-    const response= (await this.session.sendMessage(prompt)).response.text();
+    let response;
+    try {
+      response = (await this.session.sendMessage(prompt)).response.text();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new HttpError(e.message, parseStatusCode(e));
+      }
+      throw e;
+    }
 
     const history = await this.hasHistory() ? await this.getHistory() : [];
     history.push({author: Participant.USER, text: message, images, timestamp});
@@ -166,6 +174,7 @@ export default class Chat {
    * @param images The images to analyze
    * @return The descriptions of the images
    * @throws {InvalidArgumentError} If no images are given
+   * @throws {HttpError} If failed to analyze the images
    */
   private async getImageDescriptions(images: ImageData[]): Promise<string> {
     if (images.length === 0) {
@@ -181,8 +190,14 @@ export default class Chat {
       };
     }));
 
-    return visionModel.generateContent(["Describe these images", ...imgs])
-      .then(result => result.response.text());
+    try {
+      return (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new HttpError(e.message, parseStatusCode(e));
+      }
+      throw e;
+    }
   }
 
   /**

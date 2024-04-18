@@ -1,6 +1,6 @@
 import {FileStorage, Storage} from "./storage";
-import {InvalidStateError} from "./error";
-import {genAI} from "./index";
+import {HttpError, InvalidStateError} from "./error";
+import {genAI, HttpStatusCode, parseStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {UserProfile} from "./profile";
 
@@ -21,9 +21,6 @@ export abstract class Question<Q, A> {
   protected answer: A | undefined;
 
   protected constructor(question: Q, difficulty: Difficulty, correctAnswer: A) {
-    if (correctAnswer === undefined) {
-      throw new InvalidStateError("Correct answer is undefined");
-    }
     this.question = question;
     this.difficulty = difficulty;
     this.correctAnswer = correctAnswer;
@@ -169,6 +166,7 @@ export default class Quiz {
    * Create a quiz and save it to the storage
    * @returns The quiz
    * @throws {InvalidStateError} If no chat history is found
+   * @throws {HttpError} If failed to generate the quiz from the model
    */
   public async create(): Promise<MultipleChoiceQuestion[]> {
     const chatHistory = await (await Chat.getInstance()).getHistory();
@@ -183,10 +181,23 @@ export default class Quiz {
     const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
     evaluation of the patient's dementia level above, create personalized multiple-choice questions for a memory game 
     from the facts or events extracted by the chat history with the proper mixture of difficulties while considering 
-    their dementia level. The entire output must be formatted as a JSON, containing a list of 2 questions with 4 
-    choices, its difficulty level between 1 and 3 and an index to the correct choice. The object keys must be question, 
-    difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open square 
-    bracket.`;
+    their dementia level. The entire output must be formatted as a minified JSON, containing a list of 2 questions 
+    with 4 choices, its difficulty level between 1 and 3 and an index to the correct choice. The object keys must be 
+    question, difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open 
+    square bracket.`;
+
+    let response: string;
+    try {
+      response = (await model.generateContent(request)).response.text();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new HttpError(e.message, parseStatusCode(e));
+      }
+      throw e;
+    }
+
+    // sometimes, the response is wrapped with ```json ```, a markdown syntax
+    response = response.replace(/^```json\s*```$/, "");
 
     interface Response {
       question: string,
@@ -195,9 +206,29 @@ export default class Quiz {
       correctAnswer: number,
     }
 
-    const response: Response[] = JSON.parse((await model.generateContent(request)).response.text());
+    let json: Response[];
+    try {
+      json = JSON.parse(response);
 
-    const quiz = response.map(q =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!(Array.isArray(json) && json.every((item: any) =>
+        typeof item.question === "string" &&
+        typeof item.difficulty === "number" &&
+        Array.isArray(item.choices) &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        item.choices.every((choice: any) => typeof choice === "string") &&
+        typeof item.correctAnswer === "number"
+      ))) {
+        throw new TypeError("Parsed JSON does not conform to the Response[] interface");
+      }
+    } catch (e) {
+      if (e instanceof SyntaxError || e instanceof TypeError) {
+        throw new HttpError("Failed to parse the response into json: " + response, HttpStatusCode.BAD_REQUEST);
+      }
+      throw e;
+    }
+
+    const quiz = json.map(q =>
       new MultipleChoiceQuestion(q.question, q.difficulty, q.choices, q.correctAnswer)
     );
 
@@ -208,6 +239,7 @@ export default class Quiz {
   /**
    * Evaluate the dementia level of the patient
    * @returns The evaluation
+   * @throws {HttpError} If failed to generate the evaluation from the model
    */
   private async evaluate(chatHistory: Message[]): Promise<string> {
     const data = {
@@ -225,7 +257,14 @@ export default class Quiz {
     ${profile.gender.toString()}. Only explain your evaluations and do not suggest any recommendations or things to 
     consider`;
 
-    return (await model.generateContent(request)).response.text();
+    try {
+      return (await model.generateContent(request)).response.text();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new HttpError(e.message, parseStatusCode(e));
+      }
+      throw e;
+    }
   }
 
   /**

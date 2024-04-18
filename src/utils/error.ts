@@ -1,3 +1,5 @@
+import {HttpStatusCode} from "./index";
+
 /**
  * Error for invalid arguments
  */
@@ -17,15 +19,15 @@ export class InvalidStateError extends Error {
 }
 
 /**
- * Error for HTTP requests
+ * Error for http requests
  */
-export class HTTPError extends Error {
+export class HttpError extends Error {
   /**
    * The status code of the response
    */
-  public status: number;
+  public readonly status: HttpStatusCode;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: HttpStatusCode) {
     super(message);
 
     this.status = status;
