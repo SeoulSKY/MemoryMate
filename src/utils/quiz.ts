@@ -275,7 +275,7 @@ export default class Quiz {
    * Check if a saved quiz exists
    * @returns true if a quiz exists, false otherwise
    */
-  private async hasSavedQuiz(): Promise<boolean> {
+  public async hasSavedQuiz(): Promise<boolean> {
     return this.storage.has(Quiz.path);
   }
 
@@ -284,7 +284,7 @@ export default class Quiz {
    * @returns The quiz
    * @throws {InvalidStateError} If no quiz is found
    */
-  private async getSavedQuiz(): Promise<MultipleChoiceQuestion[]> {
+  public async getSavedQuiz(): Promise<MultipleChoiceQuestion[]> {
     if (!await this.hasSavedQuiz()) {
       throw new InvalidStateError("No saved quiz found");
     }

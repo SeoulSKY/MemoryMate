@@ -146,12 +146,10 @@ describe("Quiz", () => {
     it("should return true if there is a previous quiz", async () => {
       await storage.set(path, JSON.stringify(mockQuiz.map(q => q.toJSON())));
 
-      // @ts-expect-error for testing purposes
       expect(await quiz.hasSavedQuiz()).toBe(true);
     });
 
     it("should return false if there is no previous quiz", async () => {
-      // @ts-expect-error for testing purposes
       expect(await quiz.hasSavedQuiz()).toBe(false);
     });
   });
@@ -160,12 +158,10 @@ describe("Quiz", () => {
     it("should get the previous quiz", async () => {
       await storage.set(path, JSON.stringify(mockQuiz.map(q => q.toJSON())));
 
-      // @ts-expect-error for testing purposes
       expect(await quiz.getSavedQuiz()).toEqual(mockQuiz.map(q => q.toJSON()));
     });
 
     it("should throw InvalidStateError if there is no previous quiz", async () => {
-      // @ts-expect-error for testing purposes
       await expect(quiz.getSavedQuiz()).rejects.toThrow(InvalidStateError);
     });
   });
