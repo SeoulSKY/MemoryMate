@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  Pressable,
+  //Pressable,
   TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
