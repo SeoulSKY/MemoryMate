@@ -62,7 +62,7 @@ const App = () => {
               component={ChatPage}
               options={{ headerShown: false }}
             />
-             <Stack.Screen
+            <Stack.Screen
               name="Loading"
               component={Loading}
               options={{ headerShown: false }}
@@ -77,8 +77,6 @@ const App = () => {
               component={Results}
               options={{ headerShown: false }}
             />
-          
-          
           </Stack.Navigator>
         ) : null}
       </NavigationContainer>
