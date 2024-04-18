@@ -38,23 +38,8 @@ const App = () => {
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
-              name="Quiz"
-              component={Quiz}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Results"
-              component={Results}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Loading"
-              component={Loading}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ChatPage"
-              component={ChatPage}
+              name="Home"
+              component={Home}
               options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -73,10 +58,27 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="Home"
-              component={Home}
+              name="ChatPage"
+              component={ChatPage}
               options={{ headerShown: false }}
             />
+             <Stack.Screen
+              name="Loading"
+              component={Loading}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Quiz"
+              component={Quiz}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Results"
+              component={Results}
+              options={{ headerShown: false }}
+            />
+          
+          
           </Stack.Navigator>
         ) : null}
       </NavigationContainer>
