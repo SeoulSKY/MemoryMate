@@ -145,6 +145,8 @@ export default class Quiz {
   private static instance: Quiz;
 
   private static readonly path = "quiz.json";
+  private static readonly numQuestions = 10;
+  private static readonly numChoices = 4;
 
   private storage: Storage<string, string>;
 
@@ -181,9 +183,10 @@ export default class Quiz {
     const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
     evaluation of the patient's dementia level above, create personalized multiple-choice questions for a memory game 
     from the facts or events extracted by the chat history with the proper mixture of difficulties while considering 
-    their dementia level. The entire output must be formatted as a minified JSON, containing a list of 2 questions 
-    with 4 choices, its difficulty level between 1 and 3 and an index to the correct choice. The object keys must be 
-    question, difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open 
+    their dementia level. The entire output must be formatted as a minified JSON, containing a list of 
+    ${Quiz.numQuestions} questions with ${Quiz.numChoices} choices, its difficulty level between 1 and 
+    ${Object.keys(Difficulty).length / 2} and an index to the correct choice. The object keys must be question, 
+    difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open 
     square bracket.`;
 
     let response: string;
@@ -219,6 +222,7 @@ export default class Quiz {
         item.choices.every((choice: any) => typeof choice === "string") &&
         typeof item.correctAnswer === "number"
       ))) {
+        // noinspection ExceptionCaughtLocallyJS
         throw new TypeError("Parsed JSON does not conform to the Response[] interface");
       }
     } catch (e) {

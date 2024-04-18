@@ -66,6 +66,7 @@ export enum HttpStatusCode {
  * @param error The error from Gemini API
  */
 export function parseStatusCode(error: Error): HttpStatusCode {
+  // noinspection RegExpRedundantEscape
   const regex = /\[(\d+)[\s\w]*\]/;
 
   const match = regex.exec(error.message);
