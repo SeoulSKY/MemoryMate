@@ -1,4 +1,11 @@
-# MemoryMate
+<div align="center">
+    <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/MemoryMate.png" alt="memorymate">
+    <h1>Memory Mate</h1>
+</div>
+
+<blockquote align="center">
+    Connect with our empathetic AI companion tailored for those with dementia, offering friendly conversations and engaging personalized brain games to enhance cognitive abilities.
+</blockquote>
 
 <div align="center">
     <img src="https://img.shields.io/badge/Node.js-v21.7-84ba64" alt="nodejs">

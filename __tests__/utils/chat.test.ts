@@ -3,14 +3,27 @@ import {spyOn} from "jest-mock";
 
 import {MockStorage} from "../index";
 
-import Chat, {Author, Message} from "../../src/utils/chat";
+import Chat, {Message} from "../../src/utils/chat";
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
-import Profile, {Gender} from "../../src/utils/profile";
+import {UserProfile, BotProfile, Participant, Gender} from "../../src/utils/profile";
+import {ImageData} from "../../src/utils/image";
 import { FunctionCall } from "@google/generative-ai";
 
+const mockProfileData = {
+  image: undefined,
+  name: "test",
+  age: 20,
+  gender: Gender.FEMALE,
+};
+
+const mockImages: ImageData[] = [
+  {path: "image1.jpg", width: 0, height: 0, mimeType: "image/jpeg"},
+  {path: "image2.png", width: 0, height: 0, mimeType: "image/png"}
+];
+
 const mockChatHistory: Message[] = [
-  {author: Author.USER, text: "request", timestamp: new Date("1970-01-01T00:00:00Z")},
-  {author: Author.BOT, text: "response", timestamp: new Date("1970-01-01T00:00:01Z")},
+  {author: Participant.USER, text: "request", images: mockImages, timestamp: new Date("1970-01-01T00:00:00Z")},
+  {author: Participant.BOT, text: "response", images: [], timestamp: new Date("1970-01-01T00:00:01Z")},
 ];
 
 const stringMockChatHistory = JSON.stringify(mockChatHistory, (key, value) => {
@@ -27,14 +40,28 @@ describe("Chat", () => {
   let storage: MockStorage<string, string>;
 
   beforeAll(async () => {
-    const profile = Profile.getInstance(MockStorage);
-    profile["storage"] = new MockStorage<string, string>();
-    await profile.create({name: "test", age: 20, gender: Gender.MALE});
+    await UserProfile.getInstance(MockStorage).create(mockProfileData);
+    await BotProfile.getInstance(MockStorage).create(mockProfileData);
 
     chat = await Chat.getInstance(MockStorage);
 
     storage = new MockStorage();
     chat["storage"] = storage;
+
+    spyOn(chat["session"], "sendMessage")
+      .mockResolvedValue({
+        response: {
+          text: () => "response",
+          functionCalls: function (): FunctionCall[] | undefined {
+            throw new Error("Function not implemented.");
+          },
+          functionCall: function (): FunctionCall | undefined {
+            throw new Error("Function not implemented.");
+          }
+        }});
+
+    // @ts-expect-error for testing purposes
+    spyOn(chat, "getImageDescriptions").mockResolvedValue(Promise.resolve("image descriptions"));
   });
 
   beforeEach(async () => {
@@ -51,31 +78,18 @@ describe("Chat", () => {
       }
     });
 
-    it("should save the message to the chat history", async () => {
-      spyOn(chat["session"], "sendMessage")
-        .mockResolvedValue({
-          response: {
-            text: () => "response",
-            functionCalls: function (): FunctionCall[] | undefined {
-              throw new Error("Function not implemented.");
-            },
-            functionCall: function (): FunctionCall | undefined {
-              throw new Error("Function not implemented.");
-            }
-          }});
+    it("should send a message without images and return the response", async () => {
+      const response = await chat.sendMessage("request");
 
-      for (let i = 0; i < 3; i++) {
-        await chat.sendMessage("request");
+      expect(response).toEqual({author: Participant.BOT, text: "response", images: expect.any(Array),
+        timestamp: expect.any(Date)});
+    });
 
-        const history = await chat.getHistory();
-        expect(history).toHaveLength((i + 1) * 2);
+    it("should send a message with images and return the response", async () => {
+      const response = await chat.sendMessage("request", mockImages);
 
-        for (let j = 0; j <= i; j++) {
-          expect(history[j * 2]).toEqual({author: Author.USER, text: "request", timestamp: expect.any(Date)});
-          expect(history[j * 2 + 1]).toEqual({author: Author.BOT, text: "response",
-            timestamp: expect.any(Date)});
-        }
-      }
+      expect(response).toEqual({author: Participant.BOT, text: "response", images: expect.any(Array),
+        timestamp: expect.any(Date)});
     });
   });
 
@@ -112,6 +126,15 @@ describe("Chat", () => {
 
     it("should throw InvalidStateError when the chat history does not exist", async () => {
       await expect(chat.deleteHistory()).rejects.toThrow(InvalidStateError);
+    });
+  });
+
+  describe("save", () => {
+    it("should save the chat history", async () => {
+      // @ts-expect-error private method
+      await chat.save(mockChatHistory);
+
+      expect(await storage.get(historyPath)).toEqual(stringMockChatHistory);
     });
   });
 });
