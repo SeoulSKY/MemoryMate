@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Image } from "expo-image";
 import { StyleSheet, View, Text } from "react-native";
-import { Color, FontSize, FontFamily } from "../GlobalStyles";
+import { Color, FontSize, FontFamily } from "../../GlobalStyles";
 
 const Loading = () => {
   return (

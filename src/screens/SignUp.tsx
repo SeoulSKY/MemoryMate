@@ -1,67 +1,73 @@
 import * as React from "react";
-import { Image } from "expo-image";
 import {
+  Text,
   StyleSheet,
   View,
-  Text,
   Pressable,
   TouchableOpacity,
 } from "react-native";
+import { Image } from "expo-image";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
-import { Border, FontFamily, Padding, FontSize, Color } from "../GlobalStyles";
+import { Padding, Color, Border, FontFamily, FontSize } from "../../GlobalStyles";
 
-const SignUp1 = () => {
+const SignUp = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   return (
-    <View style={styles.signUp2}>
+    <View style={styles.signUp3}>
       <View style={styles.statusBarWrapper}>
         <View style={styles.statusBarWrapper}>
+          <View style={styles.frame}>
+            <Text style={styles.text}>9:41</Text>
+          </View>
           <Image
             style={styles.excludeIcon}
             contentFit="cover"
-            source={require("../assets/exclude2.png")}
+            source={require("../assets/exclude4.png")}
           />
           <Image
             style={styles.excludeIcon1}
             contentFit="cover"
-            source={require("../assets/exclude6.png")}
+            source={require("../assets/exclude5.png")}
           />
-          <View style={[styles.group, styles.groupPosition]}>
+          <View style={styles.group}>
             <Image
               style={styles.vectorIcon}
               contentFit="cover"
-              source={require("../assets/vector1.png")}
+              source={require("../assets/vector3.png")}
             />
             <View style={styles.rectangle} />
             <View style={styles.rectangle1} />
           </View>
-          <View style={[styles.frame, styles.groupPosition]}>
-            <Text style={styles.text}>9:41</Text>
-          </View>
         </View>
       </View>
-      <View style={[styles.progressBarWrapper, styles.namelblFlexBox]}>
+      <View style={[styles.progressBarWrapper, styles.wrapperFlexBox]}>
         <View style={styles.progressBar}>
-          <View style={styles.stBar} />
+          <View style={styles.barLayout} />
           <View style={[styles.ndBar, styles.barLayout]} />
-          <View style={[styles.rdBar, styles.barLayout]} />
+          <View style={[styles.ndBar, styles.barLayout]} />
         </View>
       </View>
-      <View style={[styles.about, styles.aboutPosition]}>
+      <View style={[styles.about, styles.aboutFlexBox]} />
+      <View
+        style={[
+          styles.iWantToGetToKnowAboutYoWrapper,
+          styles.nameinputPosition,
+        ]}
+      >
         <Text style={styles.iWantTo}>{`I want to get to
 know about you`}</Text>
       </View>
-      <View style={[styles.titlename, styles.aboutPosition]}>
+      <View style={[styles.titlename, styles.wrapperFlexBox]}>
         <Text style={[styles.whatIsYour, styles.yourTypo]}>
-          What is your age?
+          What is your gender?
         </Text>
       </View>
-      <View style={styles.nameinput}>
-        <View style={[styles.namelbl, styles.namelblFlexBox]}>
+      <View style={[styles.nameinput, styles.nameinputPosition]}>
+        <View style={[styles.namelbl, styles.wrapperFlexBox]}>
           <Text style={[styles.writeYourName, styles.yourTypo]}>
-            Select your age
+            What is your gender?
           </Text>
         </View>
         <Image
@@ -73,48 +79,56 @@ know about you`}</Text>
       <TouchableOpacity
         style={[styles.backbtn, styles.backbtnPosition]}
         activeOpacity={0.2}
-        onPress={() => navigation.navigate("SignUp2")}
+        onPress={() => navigation.navigate("SignUp1")}
       >
         <Text style={[styles.back, styles.backTypo]}>Back</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.nextbtn, styles.backbtnPosition]}
         activeOpacity={0.2}
-        onPress={() => navigation.navigate("SignUp")}
+        onPress={() => navigation.navigate("ChatPage")}
       >
-        <Text style={[styles.next, styles.backTypo]}>Next</Text>
+        <Text style={[styles.next, styles.backTypo]}>Done</Text>
       </TouchableOpacity>
-      <Pressable style={[styles.microphone, styles.namelblFlexBox]}>
+      <View style={[styles.microphone, styles.aboutFlexBox]}>
         <Image
           style={styles.vectorIcon1}
           contentFit="cover"
           source={require("../assets/vector4.png")}
         />
+      </View>
+      <Pressable style={styles.btnmale}>
+        <Text style={[styles.back, styles.backTypo]}>Male</Text>
+      </Pressable>
+      <Pressable style={[styles.btnfemal, styles.btnfemalPosition]}>
+        <Text style={[styles.back, styles.backTypo]}>Female</Text>
+      </Pressable>
+      <Pressable style={[styles.btnnonbinary, styles.btnfemalPosition]}>
+        <Text style={[styles.back, styles.backTypo]}>Non-binary</Text>
       </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  groupPosition: {
-    bottom: "36.36%",
-    position: "absolute",
-  },
-  namelblFlexBox: {
+  wrapperFlexBox: {
+    padding: Padding.p_3xs,
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "row",
   },
   barLayout: {
-    marginLeft: 8,
     height: 10,
+    backgroundColor: Color.colorMediumpurple,
     borderRadius: Border.br_5xs,
     flex: 1,
   },
-  aboutPosition: {
-    right: 49,
+  aboutFlexBox: {
     justifyContent: "center",
     alignItems: "center",
+    position: "absolute",
+  },
+  nameinputPosition: {
+    left: 50,
     position: "absolute",
   },
   yourTypo: {
@@ -127,8 +141,8 @@ const styles = StyleSheet.create({
     paddingVertical: Padding.p_mini,
     height: 41,
     borderRadius: Border.br_mini,
-    top: 735,
     left: "50%",
+    top: 735,
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
@@ -140,6 +154,39 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.gothicA1Bold,
     fontWeight: "700",
     textAlign: "center",
+  },
+  btnfemalPosition: {
+    backgroundColor: Color.colorAliceblue,
+    height: 52,
+    left: 94,
+    right: 109,
+    borderRadius: Border.br_mini,
+    padding: Padding.p_3xs,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    position: "absolute",
+  },
+  text: {
+    marginTop: -4.5,
+    fontSize: FontSize.size_mini,
+    lineHeight: 20,
+    fontWeight: "500",
+    fontFamily: FontFamily.robotoMedium,
+    textAlign: "center",
+    color: Color.colorBlack,
+    letterSpacing: 0,
+    left: "0%",
+    top: "50%",
+    position: "absolute",
+    width: "100%",
+  },
+  frame: {
+    top: 7,
+    left: 21,
+    width: 54,
+    height: 21,
+    position: "absolute",
   },
   excludeIcon: {
     width: 17,
@@ -188,51 +235,23 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   group: {
-    height: "25%",
-    width: "6.59%",
-    top: "38.64%",
-    right: "6.48%",
-    left: "86.93%",
-  },
-  text: {
-    marginTop: -4.5,
-    top: "50%",
-    fontSize: FontSize.size_mini,
-    lineHeight: 20,
-    fontWeight: "500",
-    fontFamily: FontFamily.robotoMedium,
-    textAlign: "center",
-    color: Color.colorBlack,
-    letterSpacing: 0,
-    left: "0%",
+    height: "31.43%",
+    width: "6.64%",
+    top: "48.57%",
+    right: "5.65%",
+    bottom: "20%",
+    left: "87.72%",
     position: "absolute",
-    width: "100%",
-  },
-  frame: {
-    height: "47.73%",
-    width: "14.4%",
-    top: "15.91%",
-    right: "80%",
-    left: "5.6%",
   },
   statusBarWrapper: {
     top: 0,
     left: 0,
-    width: 375,
-    height: 44,
+    width: 372,
+    height: 35,
     position: "absolute",
   },
-  stBar: {
-    height: 10,
-    borderRadius: Border.br_5xs,
-    backgroundColor: Color.colorMediumpurple,
-    flex: 1,
-  },
   ndBar: {
-    backgroundColor: Color.colorMediumpurple,
-  },
-  rdBar: {
-    backgroundColor: Color.colorGray_100,
+    marginLeft: 8,
   },
   progressBar: {
     width: 260,
@@ -241,11 +260,18 @@ const styles = StyleSheet.create({
   },
   progressBarWrapper: {
     top: 59,
-    width: 277,
+    flexDirection: "row",
     height: 34,
     padding: Padding.p_3xs,
     left: 49,
+    right: 49,
     position: "absolute",
+  },
+  about: {
+    top: 168,
+    height: 67,
+    left: 49,
+    right: 49,
   },
   iWantTo: {
     fontSize: FontSize.size_13xl,
@@ -255,10 +281,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Color.colorBlack,
   },
-  about: {
-    top: 168,
-    height: 67,
-    left: 49,
+  iWantToGetToKnowAboutYoWrapper: {
+    top: 126,
+    right: 48,
+    padding: Padding.p_3xs,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
   },
   whatIsYour: {
     fontSize: FontSize.size_xl,
@@ -266,38 +295,47 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   titlename: {
-    top: 316,
+    top: 268,
     left: 48,
     height: 45,
+    right: 49,
     padding: Padding.p_3xs,
+    position: "absolute",
   },
   writeYourName: {
     fontSize: FontSize.size_sm,
     textAlign: "left",
+    display: "none",
     color: Color.colorGray_100,
   },
   namelbl: {
+    width: 131,
+    flexDirection: "row",
+    height: 34,
     padding: Padding.p_3xs,
   },
   namelineIcon: {
     width: 278,
     height: 1,
     marginTop: 1,
+    display: "none",
   },
   nameinput: {
-    marginLeft: -137.5,
     top: 436,
-    left: "50%",
-    position: "absolute",
   },
   back: {
     color: Color.colorGray_100,
   },
   backbtn: {
     marginLeft: -138.5,
-    backgroundColor: Color.colorWhitesmoke,
     width: 128,
     paddingHorizontal: Padding.p_21xl,
+    backgroundColor: Color.colorWhitesmoke,
+    paddingVertical: Padding.p_mini,
+    height: 41,
+    borderRadius: Border.br_mini,
+    left: "50%",
+    top: 735,
   },
   next: {
     color: Color.colorWhite,
@@ -306,6 +344,11 @@ const styles = StyleSheet.create({
     marginLeft: 9.5,
     width: 129,
     paddingHorizontal: Padding.p_16xl,
+    paddingVertical: Padding.p_mini,
+    height: 41,
+    borderRadius: Border.br_mini,
+    left: "50%",
+    top: 735,
     backgroundColor: Color.colorMediumpurple,
   },
   vectorIcon1: {
@@ -313,18 +356,41 @@ const styles = StyleSheet.create({
     height: 62,
   },
   microphone: {
-    top: 570,
-    right: 147,
-    bottom: 160,
-    left: 147,
+    marginTop: 164,
+    width: "21.6%",
+    right: "39.2%",
+    left: "39.2%",
     borderRadius: Border.br_81xl,
     backgroundColor: Color.colorLightgray,
+    height: 82,
     paddingHorizontal: Padding.p_6xl,
     paddingVertical: Padding.p_xl,
-    position: "absolute",
+    display: "none",
+    flexDirection: "row",
+    top: "50%",
+    justifyContent: "center",
     overflow: "hidden",
   },
-  signUp2: {
+  btnmale: {
+    top: 395,
+    height: 52,
+    left: 94,
+    right: 109,
+    backgroundColor: Color.colorWhitesmoke,
+    borderRadius: Border.br_mini,
+    padding: Padding.p_3xs,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    position: "absolute",
+  },
+  btnfemal: {
+    top: 497,
+  },
+  btnnonbinary: {
+    top: 599,
+  },
+  signUp3: {
     backgroundColor: Color.colorWhite,
     height: 812,
     overflow: "hidden",
@@ -333,4 +399,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUp1;
+export default SignUp;

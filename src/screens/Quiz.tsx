@@ -9,7 +9,7 @@ import {
 import { Image } from "expo-image";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
-import { Color, Padding, Border, FontFamily, FontSize } from "../GlobalStyles";
+import { Color, Padding, Border, FontFamily, FontSize } from "../../GlobalStyles";
 
 const Quiz = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();

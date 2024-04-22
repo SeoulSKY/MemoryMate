@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
-import { FontSize, Padding, FontFamily, Color, Border } from "../GlobalStyles";
+import { FontSize, Padding, FontFamily, Color, Border } from "../../GlobalStyles";
 
 const ChatPage = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
-import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
+import { Color, Padding, FontSize, FontFamily, Border } from "../../GlobalStyles";
 
 const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
