@@ -22,18 +22,18 @@ const Results = () => {
           <Image
             style={styles.excludeIcon}
             contentFit="cover"
-            source={require("../assets/exclude2.png")}
+            source={require("../../assets/exclude2.png")}
           />
           <Image
             style={styles.excludeIcon1}
             contentFit="cover"
-            source={require("../assets/exclude3.png")}
+            source={require("../../assets/exclude3.png")}
           />
           <View style={[styles.group, styles.groupPosition]}>
             <Image
               style={[styles.vectorIcon, styles.iconLayout]}
               contentFit="cover"
-              source={require("../assets/vector1.png")}
+              source={require("../../assets/vector1.png")}
             />
             <View style={[styles.rectangle, styles.textPosition]} />
             <View style={styles.rectangle1} />
@@ -66,7 +66,7 @@ const Results = () => {
           <Image
             style={styles.frameChild}
             contentFit="cover"
-            source={require("../assets/rectangle-11651.png")}
+            source={require("../../assets/rectangle-11651.png")}
           />
         </View>
       </View>
@@ -82,12 +82,12 @@ const Results = () => {
           <Image
             style={[styles.backgroundIcon, styles.backgroundPosition]}
             contentFit="cover"
-            source={require("../assets/background.png")}
+            source={require("../../assets/background.png")}
           />
           <Image
             style={[styles.backgroundIcon, styles.backgroundPosition]}
             contentFit="cover"
-            source={require("../assets/front.png")}
+            source={require("../../assets/front.png")}
           />
           <Text style={styles.text1}>?/10</Text>
         </View>

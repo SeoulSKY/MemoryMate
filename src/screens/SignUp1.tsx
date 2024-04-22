@@ -21,18 +21,18 @@ const SignUp1 = () => {
           <Image
             style={styles.excludeIcon}
             contentFit="cover"
-            source={require("../assets/exclude2.png")}
+            source={require("../../assets/exclude2.png")}
           />
           <Image
             style={styles.excludeIcon1}
             contentFit="cover"
-            source={require("../assets/exclude6.png")}
+            source={require("../../assets/exclude6.png")}
           />
           <View style={[styles.group, styles.groupPosition]}>
             <Image
               style={styles.vectorIcon}
               contentFit="cover"
-              source={require("../assets/vector1.png")}
+              source={require("../../assets/vector1.png")}
             />
             <View style={styles.rectangle} />
             <View style={styles.rectangle1} />
@@ -67,7 +67,7 @@ know about you`}</Text>
         <Image
           style={styles.namelineIcon}
           contentFit="cover"
-          source={require("../assets/nameline.png")}
+          source={require("../../assets/nameline.png")}
         />
       </View>
       <TouchableOpacity
@@ -88,7 +88,7 @@ know about you`}</Text>
         <Image
           style={styles.vectorIcon1}
           contentFit="cover"
-          source={require("../assets/vector4.png")}
+          source={require("../../assets/vector4.png")}
         />
       </Pressable>
     </View>

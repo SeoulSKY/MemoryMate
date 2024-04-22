@@ -22,18 +22,18 @@ const Quiz = () => {
           <Image
             style={styles.excludeIcon}
             contentFit="cover"
-            source={require("../assets/exclude2.png")}
+            source={require("../../assets/exclude2.png")}
           />
           <Image
             style={styles.excludeIcon1}
             contentFit="cover"
-            source={require("../assets/exclude3.png")}
+            source={require("../../assets/exclude3.png")}
           />
           <View style={[styles.group, styles.groupPosition]}>
             <Image
               style={styles.vectorIcon}
               contentFit="cover"
-              source={require("../assets/vector1.png")}
+              source={require("../../assets/vector1.png")}
             />
             <View style={[styles.rectangle, styles.textPosition]} />
             <View style={styles.rectangle1} />
@@ -85,7 +85,7 @@ const Quiz = () => {
         <Image
           style={styles.frameChild}
           contentFit="cover"
-          source={require("../assets/rectangle-1165.png")}
+          source={require("../../assets/rectangle-1165.png")}
         />
         <View style={styles.groupWrapper}>
           <View style={styles.benParent}>

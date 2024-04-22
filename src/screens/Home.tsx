@@ -20,17 +20,17 @@ const Home = () => {
         <Image
           style={[styles.homePageChild, styles.homePosition]}
           contentFit="cover"
-          source={require("../assets/ellipse-1227.png")}
+          source={require("../../assets/ellipse-1227.png")}
         />
         <Image
           style={[styles.homepagescreenIcon, styles.iconLayout]}
           contentFit="cover"
-          source={require("../assets/homepagescreen.png")}
+          source={require("../../assets/homepagescreen.png")}
         />
         <Image
           style={[styles.homePageItem, styles.homePosition]}
           contentFit="cover"
-          source={require("../assets/ellipse-1226.png")}
+          source={require("../../assets/ellipse-1226.png")}
         />
         <View style={[styles.statusBar, styles.homePagePosition]}>
           <View style={styles.frame}>
@@ -40,7 +40,7 @@ const Home = () => {
             <Image
               style={styles.excludeIcon}
               contentFit="cover"
-              source={require("../assets/exclude.png")}
+              source={require("../../assets/exclude.png")}
             />
           </View>
           <View style={styles.frame2}>
@@ -48,14 +48,14 @@ const Home = () => {
               <Image
                 style={[styles.vectorIcon, styles.frame3Position]}
                 contentFit="cover"
-                source={require("../assets/vector.png")}
+                source={require("../../assets/vector.png")}
               />
               <View style={styles.rectangle} />
             </View>
             <Image
               style={styles.excludeIcon1}
               contentFit="cover"
-              source={require("../assets/exclude1.png")}
+              source={require("../../assets/exclude1.png")}
             />
           </View>
         </View>
@@ -87,7 +87,7 @@ Play brain games to keep your mind sharp.`}</Text>
           <Image
             style={styles.groupIcon}
             contentFit="cover"
-            source={require("../assets/group.png")}
+            source={require("../../assets/group.png")}
           />
         </View>
       </View>

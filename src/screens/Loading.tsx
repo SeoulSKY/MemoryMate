@@ -12,18 +12,18 @@ const Loading = () => {
             <Image
               style={styles.excludeIcon}
               contentFit="cover"
-              source={require("../assets/exclude2.png")}
+              source={require("../../assets/exclude2.png")}
             />
             <Image
               style={styles.excludeIcon1}
               contentFit="cover"
-              source={require("../assets/exclude3.png")}
+              source={require("../../assets/exclude3.png")}
             />
             <View style={[styles.group, styles.groupPosition]}>
               <Image
                 style={styles.vectorIcon}
                 contentFit="cover"
-                source={require("../assets/vector1.png")}
+                source={require("../../assets/vector1.png")}
               />
               <View style={[styles.rectangle, styles.textPosition]} />
               <View style={styles.rectangle1} />
@@ -40,12 +40,12 @@ const Loading = () => {
           <Image
             style={[styles.backgroundIcon, styles.text1Position]}
             contentFit="cover"
-            source={require("../assets/background1.png")}
+            source={require("../../assets/background1.png")}
           />
           <Image
             style={[styles.backgroundIcon, styles.text1Position]}
             contentFit="cover"
-            source={require("../assets/front.png")}
+            source={require("../../assets/front.png")}
           />
           <Text style={[styles.text1, styles.text1Position]}>90%</Text>
         </View>

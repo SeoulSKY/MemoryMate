@@ -5,6 +5,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
 import { FontSize, Padding, FontFamily, Color, Border } from "../../GlobalStyles";
 
+
 const ChatPage = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
@@ -16,18 +17,18 @@ const ChatPage = () => {
           <Image
             style={styles.excludeIcon}
             contentFit="cover"
-            source={require("../assets/exclude2.png")}
+            source={require("../../assets/exclude2.png")}
           />
           <Image
             style={styles.excludeIcon1}
             contentFit="cover"
-            source={require("../assets/exclude3.png")}
+            source={require("../../assets/exclude3.png")}
           />
           <View style={[styles.group, styles.groupPosition]}>
             <Image
               style={styles.vectorIcon}
               contentFit="cover"
-              source={require("../assets/vector1.png")}
+              source={require("../../assets/vector1.png")}
             />
             <View style={[styles.rectangle, styles.textPosition]} />
             <View style={styles.rectangle1} />
@@ -46,20 +47,20 @@ const ChatPage = () => {
             <Image
               style={styles.icon}
               contentFit="cover"
-              source={require("../assets/back.png")}
+              source={require("../../assets/back.png")}
             />
           </Pressable>
           <Image
             style={styles.frameChild}
             contentFit="cover"
-            source={require("../assets/rectangle-1092.png")}
+            source={require("../../assets/rectangle-1092.png")}
           />
           <Text style={[styles.ben, styles.benTypo]}>Ben</Text>
         </View>
         <Image
           style={styles.tabBarUihutChild}
           contentFit="cover"
-          source={require("../assets/ellipse-299.png")}
+          source={require("../../assets/ellipse-299.png")}
         />
       </View>
       <View style={styles.groupParent}>
@@ -87,7 +88,7 @@ for a walk and had a coffee.`}</Text>
               <Image
                 style={styles.mediaIcon}
                 contentFit="cover"
-                source={require("../assets/media.png")}
+                source={require("../../assets/media.png")}
               />
             </Pressable>
           </View>
@@ -100,7 +101,7 @@ for a walk and had a coffee.`}</Text>
             <Image
               style={styles.vectorIcon1}
               contentFit="cover"
-              source={require("../assets/vector2.png")}
+              source={require("../../assets/vector2.png")}
             />
           </Pressable>
         </View>
@@ -109,7 +110,7 @@ for a walk and had a coffee.`}</Text>
         <Image
           style={styles.frameItem}
           contentFit="cover"
-          source={require("../assets/rectangle-11652.png")}
+          source={require("../../assets/rectangle-11652.png")}
         />
         <View style={styles.groupWrapper}>
           <View style={styles.benParent}>
@@ -131,7 +132,7 @@ for a walk and had a coffee.`}</Text>
         <Image
           style={styles.frameItem}
           contentFit="cover"
-          source={require("../assets/rectangle-11652.png")}
+          source={require("../../assets/rectangle-11652.png")}
         />
         <View style={styles.groupWrapper}>
           <View style={styles.amParent}>
