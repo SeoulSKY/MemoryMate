@@ -37,11 +37,11 @@ const App = () => {
       <NavigationContainer>
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen
-              name="Home"
-              component={Home}
-              options={{ headerShown: false }}
-            />
+            {/*<Stack.Screen*/}
+            {/*  name="Home"*/}
+            {/*  component={Home}*/}
+            {/*  options={{ headerShown: false }}*/}
+            {/*/>*/}
             <Stack.Screen
               name="Quiz"
               component={Quiz}
@@ -57,11 +57,11 @@ const App = () => {
               component={Loading}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="ChatPage"
-              component={ChatPage}
-              options={{ headerShown: false }}
-            />
+            {/*<Stack.Screen*/}
+            {/*  name="ChatPage"*/}
+            {/*  component={ChatPage}*/}
+            {/*  options={{ headerShown: false }}*/}
+            {/*/>*/}
             <Stack.Screen
               name="SignUp"
               component={SignUp}
