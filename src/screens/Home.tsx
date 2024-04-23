@@ -10,9 +10,19 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
 import {AppName, BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import { UserProfile } from "../utils/profile";
+import {useEffect, useState} from "react";
 
 export default function Home() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  const [buttonText, setButtonText] = useState("Let's get started!");
+
+  useEffect(() => {
+    UserProfile.getInstance().has().then((hasProfile) => {
+      if (hasProfile) {
+        setButtonText("Continue");
+      }
+    });
+  },[]);
 
   return (
     <View style={styles.container}>
@@ -50,7 +60,7 @@ Play brain games to keep your mind sharp.`}</Text>
           }}
         >
           <Text style={[styles.buttonText, styles.text]}>
-            {"Let's get started!"}
+            {buttonText}
           </Text>
         </TouchableOpacity>
       </ImageBackground>
