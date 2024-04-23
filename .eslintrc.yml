@@ -27,3 +27,6 @@ rules:
     - selector: "enumMember"
       format:
       - UPPER_CASE
+  "max-len":
+    - error
+    - code: 120

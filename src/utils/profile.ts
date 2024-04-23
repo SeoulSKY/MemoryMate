@@ -14,7 +14,7 @@ export enum Gender {
 }
 
 export interface ProfileData {
-  readonly image: ImageData | undefined,
+  readonly image?: ImageData,
   readonly name: string,
   readonly age: number,
   readonly gender: Gender,
@@ -163,7 +163,8 @@ export class BotProfile extends Profile {
     const newData: ProfileData = {
       ...data,
       image: {
-        path: `${BotProfile.profileImageDirectory}${data.gender.toString()}/${age}_${this.getRandomInt(0, BotProfile.numImages)}.png`,
+        path: `${BotProfile.profileImageDirectory}${data.gender.toString()}/
+        ${age}_${this.getRandomInt(0, BotProfile.numImages)}.png`,
         width: 256,
         height: 256,
         mimeType: "image/png",
