@@ -1,11 +1,13 @@
 import * as React from "react";
 import { Image } from "expo-image";
 import {
+  
   StyleSheet,
   Text,
   View,
   //Pressable,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
@@ -13,6 +15,7 @@ import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
 
 const Home = () => {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  const windowDimensions = useWindowDimensions();
 
   return (
     <View style={[styles.home, styles.homeLayout]}>
