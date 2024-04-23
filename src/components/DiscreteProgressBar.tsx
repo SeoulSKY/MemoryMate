@@ -7,7 +7,18 @@ interface Props {
   total: number;
 }
 
+/**
+ * A progress bar that displays progress as a series of discrete blocks.
+ * @param progress The number of blocks that should be filled in.
+ * @param total The total number of blocks.
+ */
 export default function DiscreteProgressBar({progress, total}: Props) {
+  if (!Number.isInteger(progress)) {
+    throw new InvalidArgumentError("Progress must be an integer");
+  }
+  if (!Number.isInteger(total)) {
+    throw new InvalidArgumentError("Total must be an integer");
+  }
   if (progress < 0) {
     throw new InvalidArgumentError("Progress cannot be less than 0");
   }

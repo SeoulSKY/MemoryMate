@@ -11,7 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
 import { Padding, Color, Border, FontFamily, FontSize } from "../../GlobalStyles";
 
-const SignUp = () => {
+export default function SignUp() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   return (
@@ -398,5 +398,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default SignUp;
