@@ -20,7 +20,7 @@ const ChatScreen = () => {
       <StatusBar style="auto" />
       <View style={styles.header}>
         <Image source={require("../assets/icons/robot.png")} style={styles.icon} />
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#323232" }}>Ben</Text>
+        <Text style={{ fontSize: 20, fontWeight: "400", color: "#323232" }}>Ben</Text>
       </View>
       <FlatList
         style={{ paddingHorizontal: 16, marginBottom: 80 }}
