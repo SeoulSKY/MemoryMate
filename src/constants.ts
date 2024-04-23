@@ -2,9 +2,11 @@ export const AppName = "Memory Mate";
 
 export const Colour = {
   main: "#a475c1",
-  white: "#fff",
-  gray: "#797C7B",
-  lightGray: "#797C7B",
+  white: "white",
+  black: "black",
+  gray: "gray",
+  lightGray: "lightgray",
+  error: "red",
 };
 
 export const BorderRadius =  {

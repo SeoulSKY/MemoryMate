@@ -1,3 +1,5 @@
+import {SafeAreaProvider} from "react-native-safe-area-context";
+
 const Stack = createNativeStackNavigator();
 import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
@@ -7,8 +9,6 @@ import Results from "./src/screens/Results";
 import Loading from "./src/screens/Loading";
 import ChatPage from "./src/screens/ChatPage";
 import SignUp from "./src/screens/SignUp";
-import SignUp1 from "./src/screens/SignUp1";
-import SignUp2 from "./src/screens/SignUp2";
 import Home from "./src/screens/Home";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -33,7 +33,7 @@ const App = () => {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <NavigationContainer>
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -67,20 +67,10 @@ const App = () => {
               component={SignUp}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="SignUp1"
-              component={SignUp1}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="SignUp2"
-              component={SignUp2}
-              options={{ headerShown: false }}
-            />
           </Stack.Navigator>
         ) : null}
       </NavigationContainer>
-    </>
+    </SafeAreaProvider>
   );
 };
 export default App;

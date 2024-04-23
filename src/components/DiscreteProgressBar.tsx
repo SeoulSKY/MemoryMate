@@ -1,36 +1,21 @@
 import {BorderRadius, Colour} from "../constants";
-import {StyleSheet, View} from "react-native";
-import {InvalidArgumentError} from "../utils/error";
+import {StyleSheet, View, ViewStyle} from "react-native";
 
 interface Props {
   progress: number;
   total: number;
+  style?: ViewStyle | ViewStyle[],
 }
 
 /**
  * A progress bar that displays progress as a series of discrete blocks.
  * @param progress The number of blocks that should be filled in.
  * @param total The total number of blocks.
+ * @param style Optional style overrides for the container.
  */
-export default function DiscreteProgressBar({progress, total}: Props) {
-  if (!Number.isInteger(progress)) {
-    throw new InvalidArgumentError("Progress must be an integer");
-  }
-  if (!Number.isInteger(total)) {
-    throw new InvalidArgumentError("Total must be an integer");
-  }
-  if (progress < 0) {
-    throw new InvalidArgumentError("Progress cannot be less than 0");
-  }
-  if (total <= 0) {
-    throw new InvalidArgumentError("Total must be greater than 0");
-  }
-  if (progress > total) {
-    throw new InvalidArgumentError("Progress cannot be greater than total");
-  }
-
+export default function DiscreteProgressBar({progress, total, style}: Props) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {Array.from({length: total}, (_, i) => (
         <View
           key={i}
@@ -43,14 +28,14 @@ export default function DiscreteProgressBar({progress, total}: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: "10%"
+    marginHorizontal: "10%",
+    minHeight: "1%",
   },
   bar: {
-    height: "1%",
+    height: "100%",
     borderRadius: BorderRadius.medium,
     marginHorizontal: "2%"
   },
