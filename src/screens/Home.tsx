@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
-import {AppName, BorderRadius, Colour, FontFamily, FontSize} from "./index";
+import {AppName, BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import { UserProfile } from "../utils/profile";
 
 export default function Home() {
@@ -45,7 +45,7 @@ Play brain games to keep your mind sharp.`}</Text>
             if (await UserProfile.getInstance().has()) {
               navigation.navigate("ChatPage");
             } else {
-              navigation.navigate("SignUp2");
+              navigation.navigate("SignUp");
             }
           }}
         >
