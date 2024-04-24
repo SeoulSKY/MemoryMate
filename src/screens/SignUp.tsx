@@ -82,8 +82,7 @@ export default function SignUp() {
     <SafeAreaView style={styles.container} onStartShouldSetResponder={() => {
       Keyboard.dismiss();
       return false;
-    }
-    }>
+    }}>
       <DiscreteProgressBar progress={progress} total={numInputs} style={styles.progressBar}/>
       <Text style={styles.title}>{"I want to get to know about you"}</Text>
       <KeyboardAvoidingView
@@ -92,75 +91,75 @@ export default function SignUp() {
         keyboardVerticalOffset={-150}
       >
         {progress === 1 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"What is your name?"}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={"Press here to write your name"}
-                maxLength={40}
-                textAlign={"center"}
-                value={name}
-                onChangeText={text => {
-                  setName(text);
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"What is your name?"}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={"Press here to write your name"}
+              maxLength={40}
+              textAlign={"center"}
+              value={name}
+              onChangeText={text => {
+                setName(text);
 
-                  if (!isNameValid(text)) {
-                    setError("Your name cannot be empty");
-                    setRightButtonDisabled(true);
-                    return;
-                  }
+                if (!isNameValid(text)) {
+                  setError("Your name cannot be empty");
+                  setRightButtonDisabled(true);
+                  return;
+                }
 
-                  setError("");
-                  setRightButtonDisabled(false);
-                }}
-              />
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+                setError("");
+                setRightButtonDisabled(false);
+              }}
+            />
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
 
         {progress === 2 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"How old are you?"}</Text>
-              <TextInput
-                style={[styles.input, styles.ageInput]}
-                placeholder={"Press here to write your age"}
-                keyboardType={"numeric"}
-                textAlign={"center"}
-                maxLength={3}
-                value={age === undefined ? "" : age.toString()}
-                onChangeText={text => {
-                  const num = parseInt(text);
-                  setAge(isNaN(num) ? undefined : num);
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"How old are you?"}</Text>
+            <TextInput
+              style={[styles.input, styles.ageInput]}
+              placeholder={"Press here to write your age"}
+              keyboardType={"numeric"}
+              textAlign={"center"}
+              maxLength={3}
+              value={age === undefined ? "" : age.toString()}
+              onChangeText={text => {
+                const num = parseInt(text);
+                setAge(isNaN(num) ? undefined : num);
 
-                  if (!isAgeValid(num)) {
-                    setError("Please enter a valid age");
-                    setRightButtonDisabled(true);
-                    return;
-                  }
+                if (!isAgeValid(num)) {
+                  setError("Please enter a valid age");
+                  setRightButtonDisabled(true);
+                  return;
+                }
 
-                  setError("");
-                  setRightButtonDisabled(false);
-                }}/>
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+                setError("");
+                setRightButtonDisabled(false);
+              }}/>
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
         {progress === 3 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"What is your gender?"}</Text>
-              <SelectList
-                placeholder={"Press here to select your gender"}
-                search={false}
-                data={genderList}
-                maxHeight={130}
-                inputStyles={styles.genderPlaceholder}
-                dropdownTextStyles={styles.genderText}
-                boxStyles={styles.genderSelect}
-                dropdownStyles={{...styles.genderSelect}}
-                defaultOption={gender === undefined ? undefined : genderList.find(g => g.key)}
-                setSelected={setGender}
-                onSelect={() => setRightButtonDisabled(false)}
-              />
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"What is your gender?"}</Text>
+            <SelectList
+              placeholder={"Press here to select your gender"}
+              search={false}
+              data={genderList}
+              maxHeight={130}
+              inputStyles={styles.genderPlaceholder}
+              dropdownTextStyles={styles.genderText}
+              boxStyles={styles.genderSelect}
+              dropdownStyles={{...styles.genderSelect}}
+              defaultOption={gender === undefined ? undefined : genderList.find(g => g.key)}
+              setSelected={setGender}
+              onSelect={() => setRightButtonDisabled(false)}
+            />
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
       </KeyboardAvoidingView>
 
