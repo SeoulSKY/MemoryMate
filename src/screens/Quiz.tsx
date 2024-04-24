@@ -125,7 +125,7 @@ export default function (){
           contentContainerStyle={styles.choiceGridContainer}
           columnWrapperStyle={styles.choiceGridContainer}
           data={questions.at(progress - 1)!.getChoices().map((choice, i) => {
-            return {index: i, question: choice};
+            return {index: i, choice: choice};
           })}
           renderItem={({item}) => {
             return (
@@ -136,7 +136,7 @@ export default function (){
                   selections[progress - 1] = item.index;
                 }}
               >
-                <Text style={styles.choiceText}>{item.question}</Text>
+                <Text style={styles.choiceText}>{item.choice}</Text>
               </TouchableOpacity>
             );
           }}
