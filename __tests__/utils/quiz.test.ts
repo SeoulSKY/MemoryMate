@@ -168,7 +168,6 @@ describe("Quiz", () => {
 
   describe("save", () => {
     it("should save the quiz", async () => {
-      // @ts-expect-error for testing purposes
       await quiz.save(mockQuiz);
 
       expect(await storage.get(path)).toEqual(JSON.stringify(mockQuiz.map(q => q.toJSON())));

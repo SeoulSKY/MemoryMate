@@ -121,7 +121,54 @@ export class BotProfile extends Profile {
 
   private static instance: BotProfile;
 
-  private static readonly profileImageDirectory = "assets/profiles/";
+  private static readonly profileImages: {
+    [gender: string]: {
+      [age: number]: number[];
+    }
+  } = {
+      [Gender.MALE]: {
+        40: [require("../../assets/profiles/male/40_0.png"), require("../../assets/profiles/male/40_1.png")],
+        50: [require("../../assets/profiles/male/50_0.png"), require("../../assets/profiles/male/50_1.png")],
+        60: [require("../../assets/profiles/male/60_0.png"), require("../../assets/profiles/male/60_1.png")],
+        70: [require("../../assets/profiles/male/70_0.png"), require("../../assets/profiles/male/70_1.png")],
+        80: [require("../../assets/profiles/male/80_0.png"), require("../../assets/profiles/male/80_1.png")],
+        90: [require("../../assets/profiles/male/90_0.png"), require("../../assets/profiles/male/90_1.png")],
+      },
+      [Gender.FEMALE]: {
+        40: [require("../../assets/profiles/female/40_0.png"), require("../../assets/profiles/female/40_1.png")],
+        50: [require("../../assets/profiles/female/50_0.png"), require("../../assets/profiles/female/50_1.png")],
+        60: [require("../../assets/profiles/female/60_0.png"), require("../../assets/profiles/female/60_1.png")],
+        70: [require("../../assets/profiles/female/70_0.png"), require("../../assets/profiles/female/70_1.png")],
+        80: [require("../../assets/profiles/female/80_0.png"), require("../../assets/profiles/female/80_1.png")],
+        90: [require("../../assets/profiles/female/90_0.png"), require("../../assets/profiles/female/90_1.png")],
+      },
+      [Gender.NON_BINARY]: {
+        40: [
+          require("../../assets/profiles/non-binary/40_0.png"),
+          require("../../assets/profiles/non-binary/40_1.png")
+        ],
+        50: [
+          require("../../assets/profiles/non-binary/50_0.png"),
+          require("../../assets/profiles/non-binary/50_1.png")
+        ],
+        60: [
+          require("../../assets/profiles/non-binary/60_0.png"),
+          require("../../assets/profiles/non-binary/60_1.png")
+        ],
+        70: [
+          require("../../assets/profiles/non-binary/70_0.png"),
+          require("../../assets/profiles/non-binary/70_1.png")
+        ],
+        80: [
+          require("../../assets/profiles/non-binary/80_0.png"),
+          require("../../assets/profiles/non-binary/80_1.png"),
+        ],
+        90: [
+          require("../../assets/profiles/non-binary/90_0.png"),
+          require("../../assets/profiles/non-binary/90_1.png")
+        ],
+      },
+    };
 
   private static readonly path = "botProfile.json";
 
@@ -158,13 +205,10 @@ export class BotProfile extends Profile {
       throw new InvalidArgumentError(`Given profile data has an invalid age: ${data.age}`);
     }
 
-    const age = Math.floor(Math.min(Math.max(data.age, BotProfile.minAge), BotProfile.maxAge) / 10) * 10;
-
     const newData: ProfileData = {
       ...data,
       image: {
-        path: `${BotProfile.profileImageDirectory}${data.gender.toString()}/
-        ${age}_${this.getRandomInt(0, BotProfile.numImages)}.png`,
+        path: this.getImagePath(data),
         width: 256,
         height: 256,
         mimeType: "image/png",
@@ -175,13 +219,25 @@ export class BotProfile extends Profile {
     return newData;
   }
 
-  /**
-   * Get a random number between min and max (exclusive)
-   * @param min The minimum number
-   * @param max The maximum number
-   * @returns A random number between min and max
-   */
-  private getRandomInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min) + min);
+  public async get(): Promise<ProfileData> {
+    const data = await super.get();
+    return {
+      ...data,
+      image: {
+        ...data.image!,
+        path: this.getImagePath(data),
+      }
+    };
+  }
+
+  private getImagePath(data: ProfileData): number {
+    const age = Math.floor(Math.min(Math.max(data.age, BotProfile.minAge), BotProfile.maxAge) / 10) * 10;
+
+    let hash = age;
+    for (let i = 0; i < data.name.length; i++) {
+      hash += data.name.charCodeAt(i);
+    }
+
+    return BotProfile.profileImages[data.gender][age][hash % BotProfile.numImages];
   }
 }

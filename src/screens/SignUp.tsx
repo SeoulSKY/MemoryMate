@@ -7,9 +7,15 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {SelectList} from "react-native-dropdown-select-list/index";
-import {Gender, UserProfile} from "../utils/profile";
+import {BotProfile, Gender, UserProfile} from "../utils/profile";
 import {InvalidStateError} from "../utils/error";
 import NavigationButtons from "../components/NavigationButtons";
+
+const botNames = {
+  [Gender.MALE]: ["Ben", "Charlie", "David", "Ethan", "Frank", "George", "Harry", "Ian", "Jack", "Kevin"],
+  [Gender.FEMALE]: ["Alice", "Bella", "Catherine", "Daisy", "Emily", "Fiona", "Grace", "Hannah", "Isabella", "Jasmine"],
+  [Gender.NON_BINARY]: ["Alex", "Bailey", "Charlie", "Dakota", "Eli", "Finley", "Gray", "Harper", "Indigo", "Jordan"]
+};
 
 const numInputs = 3;
 
@@ -21,12 +27,21 @@ const genderList = [
   {key: Gender.NON_BINARY, value: "Non-binary"},
 ];
 
+const ageDifferenceRange = 3;
+
 function isNameValid(name: string): boolean {
   return name.trim().length > 0;
 }
 
 function isAgeValid(age: number): boolean {
   return !isNaN(age) && Number.isInteger(age) && 0 <= age && age <= 150;
+}
+
+function randomNumberInRange(num: number, range: number) {
+  const min = num - range;
+  const max = num + range;
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export default function SignUp() {
@@ -67,8 +82,7 @@ export default function SignUp() {
     <SafeAreaView style={styles.container} onStartShouldSetResponder={() => {
       Keyboard.dismiss();
       return false;
-    }
-    }>
+    }}>
       <DiscreteProgressBar progress={progress} total={numInputs} style={styles.progressBar}/>
       <Text style={styles.title}>{"I want to get to know about you"}</Text>
       <KeyboardAvoidingView
@@ -77,75 +91,75 @@ export default function SignUp() {
         keyboardVerticalOffset={-150}
       >
         {progress === 1 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"What is your name?"}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={"Press here to write your name"}
-                maxLength={40}
-                textAlign={"center"}
-                value={name}
-                onChangeText={text => {
-                  setName(text);
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"What is your name?"}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={"Press here to write your name"}
+              maxLength={40}
+              textAlign={"center"}
+              value={name}
+              onChangeText={text => {
+                setName(text);
 
-                  if (!isNameValid(text)) {
-                    setError("Your name cannot be empty");
-                    setRightButtonDisabled(true);
-                    return;
-                  }
+                if (!isNameValid(text)) {
+                  setError("Your name cannot be empty");
+                  setRightButtonDisabled(true);
+                  return;
+                }
 
-                  setError("");
-                  setRightButtonDisabled(false);
-                }}
-              />
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+                setError("");
+                setRightButtonDisabled(false);
+              }}
+            />
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
 
         {progress === 2 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"How old are you?"}</Text>
-              <TextInput
-                style={[styles.input, styles.ageInput]}
-                placeholder={"Press here to write your age"}
-                keyboardType={"numeric"}
-                textAlign={"center"}
-                maxLength={3}
-                value={age === undefined ? "" : age.toString()}
-                onChangeText={text => {
-                  const num = parseInt(text);
-                  setAge(isNaN(num) ? undefined : num);
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"How old are you?"}</Text>
+            <TextInput
+              style={[styles.input, styles.ageInput]}
+              placeholder={"Press here to write your age"}
+              keyboardType={"numeric"}
+              textAlign={"center"}
+              maxLength={3}
+              value={age === undefined ? "" : age.toString()}
+              onChangeText={text => {
+                const num = parseInt(text);
+                setAge(isNaN(num) ? undefined : num);
 
-                  if (!isAgeValid(num)) {
-                    setError("Please enter a valid age");
-                    setRightButtonDisabled(true);
-                    return;
-                  }
+                if (!isAgeValid(num)) {
+                  setError("Please enter a valid age");
+                  setRightButtonDisabled(true);
+                  return;
+                }
 
-                  setError("");
-                  setRightButtonDisabled(false);
-                }}/>
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+                setError("");
+                setRightButtonDisabled(false);
+              }}/>
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
         {progress === 3 &&
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{"What is your gender?"}</Text>
-              <SelectList
-                placeholder={"Press here to select your gender"}
-                search={false}
-                data={genderList}
-                maxHeight={130}
-                inputStyles={styles.genderPlaceholder}
-                dropdownTextStyles={styles.genderText}
-                boxStyles={styles.genderSelect}
-                dropdownStyles={{...styles.genderSelect}}
-                defaultOption={gender === undefined ? undefined : genderList.find(g => g.key)}
-                setSelected={setGender}
-                onSelect={() => setRightButtonDisabled(false)}
-              />
-              <Text style={styles.errorLabel}>{error}</Text>
-            </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{"What is your gender?"}</Text>
+            <SelectList
+              placeholder={"Press here to select your gender"}
+              search={false}
+              data={genderList}
+              maxHeight={130}
+              inputStyles={styles.genderPlaceholder}
+              dropdownTextStyles={styles.genderText}
+              boxStyles={styles.genderSelect}
+              dropdownStyles={{...styles.genderSelect}}
+              defaultOption={gender === undefined ? undefined : genderList.find(g => g.key)}
+              setSelected={setGender}
+              onSelect={() => setRightButtonDisabled(false)}
+            />
+            <Text style={styles.errorLabel}>{error}</Text>
+          </View>
         }
       </KeyboardAvoidingView>
 
@@ -167,7 +181,15 @@ export default function SignUp() {
             return;
           }
 
+          const names = botNames[gender as Gender];
+          const randomIndex = Math.floor(Math.random() * names.length);
+
           await UserProfile.getInstance().create({name, age: age as number, gender: gender as Gender});
+          await BotProfile.getInstance().create({
+            name: names[randomIndex],
+            age: randomNumberInRange(age as number, ageDifferenceRange),
+            gender: gender as Gender
+          });
 
           navigation.navigate("ChatPage");
         }}/>
@@ -183,6 +205,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     marginTop: "5%",
+    width: "90%",
   },
   title: {
     fontSize: FontSize.large,

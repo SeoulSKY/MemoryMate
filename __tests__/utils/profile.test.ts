@@ -5,7 +5,12 @@ import {Gender, ProfileData, UserProfile, BotProfile} from "../../src/utils/prof
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
 
 const mockProfileData: ProfileData = {
-  image: undefined,
+  image: {
+    path: 0,
+    width: 256,
+    height: 256,
+    mimeType: "image/png",
+  },
   name: "test",
   age: 50,
   gender: Gender.MALE,
@@ -82,7 +87,6 @@ describe("Bot Profile", () => {
   const botProfile = BotProfile.getInstance();
 
   const path = BotProfile["path"];
-  const profileDirectory = BotProfile["profileImageDirectory"];
   let storage: MockStorage<string, string>;
 
   beforeEach(() => {
@@ -106,10 +110,7 @@ describe("Bot Profile", () => {
   describe("create", () => {
     it("should create a new bot profile", async () => {
       const newProfileData = await botProfile.create(mockProfileData);
-      const path = newProfileData.image?.path as string;
-      expect(path.startsWith(`${profileDirectory}${mockProfileData.gender.toString()}/`) ||
-        path.endsWith(`${mockProfileData.age}_0.png`) || path.endsWith(`${mockProfileData.age}_1.png`))
-        .toBe(true);
+      expect(typeof newProfileData.image?.path).toBe("number");
 
       expect(newProfileData).toEqual({
         ...mockProfileData,
@@ -147,8 +148,9 @@ describe("Bot Profile", () => {
 
     it("should return the bot profile", async () => {
       await storage.set(path, JSON.stringify(mockProfileData));
+      const result = await botProfile.get();
 
-      expect(await botProfile.get()).toEqual(mockProfileData);
+      expect({...result, image: mockProfileData.image}).toEqual(mockProfileData);
     });
   });
 });

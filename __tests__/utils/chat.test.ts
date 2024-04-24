@@ -10,7 +10,6 @@ import {ImageData} from "../../src/utils/image";
 import { FunctionCall } from "@google/generative-ai";
 
 const mockProfileData = {
-  image: undefined,
   name: "test",
   age: 20,
   gender: Gender.FEMALE,

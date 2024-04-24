@@ -296,7 +296,7 @@ export default class Quiz {
    * Save the quiz
    * @param quiz The quiz
    */
-  private async save(quiz: MultipleChoiceQuestion[]): Promise<void> {
+  public async save(quiz: MultipleChoiceQuestion[]): Promise<void> {
     return this.storage.set(Quiz.path, JSON.stringify(quiz));
   }
 }

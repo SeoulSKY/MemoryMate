@@ -66,7 +66,7 @@ const Results = () => {
           <Image
             style={styles.frameChild}
             contentFit="cover"
-            source={require("../../assets/rectangle-11651.png")}
+            source={require("../../assets/MemoryMate.png")}
           />
         </View>
       </View>

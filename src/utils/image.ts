@@ -2,9 +2,8 @@ import {copyAsync} from "expo-file-system";
 import {FileStorage, Storage} from "./storage";
 import {InvalidArgumentError} from "./error";
 
-
 export interface ImageData {
-  readonly path: string,
+  readonly path: string | number,
   readonly width: number,
   readonly height: number,
   readonly mimeType: "image/png" | "image/jpeg" | "image/gif",
@@ -82,9 +81,13 @@ export default class Image {
    * @throws {InvalidArgumentError} If the image path is invalid
    */
   public async saveFromGallery(data: ImageData): Promise<ImageData> {
+    if (typeof data.path == "number") {
+      throw new InvalidArgumentError("Invalid image path: " + data.path);
+    }
+
     const fileName = data.path.split("/").pop();
     if (fileName === undefined || fileName.trim() == "" || !this.isImage(fileName)) {
-      throw new InvalidArgumentError("Invalid image path");
+      throw new InvalidArgumentError("Invalid image path: " + data.path);
     }
 
     return copyAsync({
@@ -100,9 +103,13 @@ export default class Image {
    * Load the image from the storage into a base64 string
    * @param data The image data
    * @returns The base64 string of the image
-   * @throws {InvalidArgumentError} If the image is not found
+   * @throws {InvalidArgumentError} If the image path is invalid
    */
   public async load(data: ImageData): Promise<string> {
+    if (typeof data.path == "number") {
+      throw new InvalidArgumentError("Invalid image path: " + data.path);
+    }
+
     if (!await this.has(data.path)) {
       throw new InvalidArgumentError("Could not find image: " + data.path);
     }

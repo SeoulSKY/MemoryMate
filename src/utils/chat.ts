@@ -159,8 +159,8 @@ export default class Chat {
     return this.getHistory().then(history =>
       history.flatMap(message => message.images)
         .map(image => image.path)
-        .filter(path => Image.getInstance().has(path))
-        .forEach(path => Image.getInstance().delete(path))
+        .filter(path => Image.getInstance().has(path as string))
+        .forEach(path => Image.getInstance().delete(path as string))
     ).then(() => this.storage.delete(Chat.historyPath))
       .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
       .then(async profiles => {
