@@ -22,7 +22,7 @@ export default function Avatar({imagePath, name, text, style}: Props) {
         </View>
       }
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colour.skyBlue,
     borderRadius: BorderRadius.medium,
     borderTopLeftRadius: 0,
+    width: "100%",
   },
   text: {
     fontSize: FontSize.medium,

@@ -15,7 +15,7 @@ const botNames = {
   [Gender.MALE]: ["Ben", "Charlie", "David", "Ethan", "Frank", "George", "Harry", "Ian", "Jack", "Kevin"],
   [Gender.FEMALE]: ["Alice", "Bella", "Catherine", "Daisy", "Emily", "Fiona", "Grace", "Hannah", "Isabella", "Jasmine"],
   [Gender.NON_BINARY]: ["Alex", "Bailey", "Charlie", "Dakota", "Eli", "Finley", "Gray", "Harper", "Indigo", "Jordan"]
-}
+};
 
 const numInputs = 3;
 

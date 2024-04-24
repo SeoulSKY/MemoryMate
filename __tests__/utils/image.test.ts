@@ -7,7 +7,7 @@ import {MockStorage} from "../index";
 import Image, {ImageData} from "../../src/utils/image";
 import {InvalidArgumentError} from "../../src/utils/error";
 
-const mockImagePath = "image.jpg"
+const mockImagePath = "image.jpg";
 const mockImageJsonPath = mockImagePath.replace(".jpg", ".json");
 
 const mockImageData: ImageData = {

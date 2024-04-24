@@ -3,35 +3,45 @@ import {
   StyleSheet,
   View,
   Text,
-  FlatList, TouchableOpacity,
+  TouchableOpacity,
 } from "react-native";
-import { Image } from "expo-image";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
 import {useEffect, useState} from "react";
-import {BotProfile, Gender, ProfileData} from "../utils/profile";
+import {Gender, ProfileData} from "../utils/profile";
 import Quiz, {Difficulty, MultipleChoiceQuestion} from "../utils/quiz";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import NavigationButtons from "../components/NavigationButtons";
 import Avatar from "../components/Avatar";
+import {FlatGrid} from "react-native-super-grid";
+
+let selections: number[] = [];
+
+const defaultRightButtonText = "Next";
 
 export default function (){
   const [botProfile, setBotProfile] = useState<ProfileData>();
   const [questions, setQuestions] = useState<MultipleChoiceQuestion[]>();
-  const [numQuestions, setNumQuestions] = useState(10);
+  const [numQuestions, setNumQuestions] = useState(0);
+  const [selected, setSelected] = useState<number | undefined>();
   const [progress, setProgress] = useState(1);
+
+  const [rightButtonText, setRightButtonText] = useState(defaultRightButtonText);
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   useEffect(() => {
+    selections = [];
+
     // BotProfile.getInstance().get().then(setBotProfile).catch(console.error);
     // Quiz.getInstance().getSavedQuiz().then(questions => {
     //   setQuestions(questions);
     //   setNumQuestions(questions.length);
     // }).catch(console.error);
 
+    // mock data
     setBotProfile({
       name: "Ben",
       image: {
@@ -48,7 +58,7 @@ export default function (){
       new MultipleChoiceQuestion(
         "So, I went to the market today. It was crowded. Where did you go yesterday?",
         Difficulty.EASY,
-        ["Library", "Mary's House", "Stayed at home", "Swimming Pool"],
+        ["Library", "Mary's House", "Stayed at Home", "Swimming Pool"],
         1,
       ),
       new MultipleChoiceQuestion(
@@ -76,14 +86,23 @@ export default function (){
         1,
       ),
     ]);
-    }, []);
+  }, []);
+
+  useEffect(() => {
+    if (progress === numQuestions) {
+      setRightButtonText("Finish");
+      return;
+    }
+
+    setRightButtonText(defaultRightButtonText);
+  }, [progress]);
 
   useEffect(() => {
     if (questions === undefined) {
       return;
     }
     setNumQuestions(questions.length);
-  }, [questions])
+  }, [questions]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,35 +111,71 @@ export default function (){
       {questions && <View style={styles.question}>
         {botProfile && <Avatar
           style={styles.avatar}
-          imagePath={botProfile.image?.path!}
+          imagePath={botProfile.image!.path}
           name={botProfile.name}
           text={questions.at(progress - 1)?.getQuestion()}
         />}
+      </View>}
+
+      <View style={styles.bottomContainer}>
         <Text style={styles.instruction}>Choose One</Text>
-        <FlatList contentContainerStyle={styles.choiceContainer}
-          numColumns={2}
-          data={questions.at(progress - 1)?.getChoices().map((choice, i) => {
-            return {id: i, title: choice};
+        {questions && <FlatGrid
+          style={styles.grid}
+          contentContainerStyle={styles.choiceGridContainer}
+          maxItemsPerRow={2}
+          data={questions.at(progress - 1)!.getChoices().map((choice, i) => {
+            return {index: i, question: choice};
           })}
           renderItem={({item}) => {
             return (
-              <TouchableOpacity style={styles.choiceButton}>
-                <Text style={styles.choiceText}>{item.title}</Text>
+              <TouchableOpacity
+                style={[styles.choiceButton, selected === item.index && styles.selected]}
+                onPress={() => {
+                  setSelected(item.index);
+                  selections[progress - 1] = item.index;
+                }}
+              >
+                <Text style={styles.choiceText}>{item.question}</Text>
               </TouchableOpacity>
             );
           }}
-        />
-      </View>}
-      <NavigationButtons style={styles.navigationButtons} onLeftPress={() => {}} onRightPress={() => {}}/>
+        />}
+        <NavigationButtons
+          style={styles.navigationButtons}
+          leftDisabled={progress <= 1}
+          rightDisabled={selected === undefined}
+          rightText={rightButtonText}
+          onLeftPress={() => {
+            if (progress > 1) {
+              setSelected(selections[progress - 2]);
+              setProgress(progress - 1);
+
+              return;
+            }
+
+            navigation.goBack();
+          }}
+          onRightPress={async () => {
+            if (progress < numQuestions) {
+              setSelected(selections[progress]);
+              setProgress(progress + 1);
+              return;
+            }
+
+            questions?.forEach((question, i) => {
+              question.setAnswer(selections[i]);
+            });
+            await Quiz.getInstance().save(questions!);
+
+            navigation.navigate("Results");
+          }}/>
+      </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
     maxWidth: "95%",
     alignSelf: "center",
@@ -135,7 +190,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     marginHorizontal: "3%",
-    marginBottom: "10%",
+    minWidth: "100%",
   },
   instruction: {
     textAlign: "center",
@@ -144,26 +199,39 @@ const styles = StyleSheet.create({
     color: Colour.main,
     marginBottom: "2%",
   },
-  choiceContainer: {
+  grid: {
+    minHeight: "100%",
+    aspectRatio: 1,
+  },
+  choiceGridContainer: {
+    justifyContent: "center",
     alignItems: "center",
   },
   choiceButton: {
     backgroundColor: Colour.skyBlue,
     borderRadius: BorderRadius.medium,
     justifyContent: "center",
-    alignItems: "center",
-    margin: "2%",
-    width: "45%",
+    width: "100%",
     aspectRatio: 1,
+    padding: "10%"
   },
   choiceText: {
     fontSize: FontSize.medium - 1,
     fontFamily: FontFamily.robotoMedium,
     textAlign: "center",
     color: Colour.black,
-    padding: "5%",
+  },
+  selected: {
+    borderWidth: 5,
+    borderColor: Colour.main,
   },
   navigationButtons: {
+    marginTop: "5%",
+  },
+  bottomContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
     marginBottom: "5%",
   }
 });

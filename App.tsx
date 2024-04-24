@@ -7,7 +7,6 @@ import { useFonts } from "expo-font";
 import Quiz from "./src/screens/Quiz";
 import Results from "./src/screens/Results";
 import Loading from "./src/screens/Loading";
-import ChatPage from "./src/screens/ChatPage";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
 
@@ -37,11 +36,11 @@ const App = () => {
       <NavigationContainer>
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {/*<Stack.Screen*/}
-            {/*  name="Home"*/}
-            {/*  component={Home}*/}
-            {/*  options={{ headerShown: false }}*/}
-            {/*/>*/}
+            <Stack.Screen
+              name="Home"
+              component={Home}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="Quiz"
               component={Quiz}
