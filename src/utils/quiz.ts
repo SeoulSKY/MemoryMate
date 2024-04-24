@@ -66,14 +66,16 @@ export abstract class Question<Q, A> {
   /**
    * Set the answer of the question
    * @param answer The answer
+   * @returns This question for method chaining
    * @throws {InvalidStateError} If the question is already answered
    */
-  public setAnswer(answer: A): void {
+  public setAnswer(answer: A): this {
     if (this.isAnswered()) {
       throw new InvalidStateError("Question is already answered");
     }
 
     this.answer = answer;
+    return this;
   }
 
   /**
@@ -122,7 +124,7 @@ export class MultipleChoiceQuestion extends Question<string, number> {
       throw new InvalidStateError("Invalid answer choice: " + choice);
     }
 
-    super.setAnswer(choice);
+    return super.setAnswer(choice);
   }
 
   /**

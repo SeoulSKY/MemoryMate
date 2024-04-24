@@ -5,7 +5,7 @@ import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import Quiz from "./src/screens/Quiz";
-import Results from "./src/screens/Results";
+import Result from "./src/screens/Result";
 import Loading from "./src/screens/Loading";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
@@ -48,7 +48,7 @@ const App = () => {
             />
             <Stack.Screen
               name="Results"
-              component={Results}
+              component={Result}
               options={{ headerShown: false }}
             />
             <Stack.Screen

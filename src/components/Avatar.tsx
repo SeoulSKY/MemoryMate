@@ -5,7 +5,7 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 interface Props {
   imagePath: string | number,
   name: string,
-  text: string | undefined,
+  text?: string,
   style?: ViewStyle | ViewStyle[],
 }
 
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colour.skyBlue,
     borderRadius: BorderRadius.medium,
     borderTopLeftRadius: 0,
-    width: "100%",
+    minWidth: "100%",
   },
   text: {
     fontSize: FontSize.medium,
