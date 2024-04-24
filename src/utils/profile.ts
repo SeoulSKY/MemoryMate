@@ -1,5 +1,5 @@
 import {Storage, FileStorage} from "./storage";
-import {InvalidArgumentError, InvalidStateError} from "./error";
+import {InvalidArgumentError, InvalidStateError} from "./errors";
 import {ImageData} from "./image";
 
 export enum Participant {
@@ -79,6 +79,17 @@ abstract class Profile {
     }
 
     return JSON.parse(await this.storage.get(this.path));
+  }
+
+  /**
+   * Delete the profile
+   * @throws {InvalidStateError} If the profile does not exist
+   */
+  public async delete(): Promise<void> {
+    if (!await this.has()) {
+      throw new InvalidStateError("Profile does not exist");
+    }
+    return this.storage.delete(this.path);
   }
 
   /**

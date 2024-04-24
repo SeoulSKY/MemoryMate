@@ -11,7 +11,6 @@ import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-//import { View, Text, Pressable, TouchableOpacity } from "react-native";
 
 const App = () => {
   const [hideSplashScreen] = React.useState(true);
@@ -23,7 +22,7 @@ const App = () => {
     "GothicA1-Bold": require("./assets/fonts/GothicA1-Bold.ttf"),
     "GothicA1-ExtraBold": require("./assets/fonts/GothicA1-ExtraBold.ttf"),
     "IBMPlexSans-Bold": require("./assets/fonts/IBMPlexSans-Bold.ttf"),
-    NanumGothicExtraBold: require("./assets/fonts/NanumGothicExtraBold.ttf"),
+    "NanumGothicExtraBold": require("./assets/fonts/NanumGothicExtraBold.ttf"),
     "Nunito-Black": require("./assets/fonts/Nunito-Black.ttf"),
   });
 

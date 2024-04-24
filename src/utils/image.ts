@@ -1,6 +1,6 @@
 import {copyAsync} from "expo-file-system";
 import {FileStorage, Storage} from "./storage";
-import {InvalidArgumentError} from "./error";
+import {InvalidArgumentError} from "./errors";
 
 export interface ImageData {
   readonly path: string | number,
@@ -48,6 +48,13 @@ export default class Image {
 
     return this.storage.delete(Image.directory + path)
       .then(() => this.storage.delete(this.replaceExtension(Image.directory + path, ".json")));
+  }
+
+  /**
+   * Delete all images from the storage
+   */
+  public async deleteAll(): Promise<void> {
+    return this.storage.delete(Image.directory);
   }
 
   /**

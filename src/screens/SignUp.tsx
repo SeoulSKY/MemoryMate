@@ -8,7 +8,7 @@ import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {SelectList} from "react-native-dropdown-select-list/index";
 import {BotProfile, Gender, UserProfile} from "../utils/profile";
-import {InvalidStateError} from "../utils/error";
+import {InvalidStateError} from "../utils/errors";
 import NavigationButtons from "../components/NavigationButtons";
 
 const botNames = {

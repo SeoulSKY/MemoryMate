@@ -1,5 +1,5 @@
 import {FileStorage, Storage} from "./storage";
-import {HttpError, InvalidStateError} from "./error";
+import {HttpError, InvalidStateError} from "./errors";
 import {genAI, HttpStatusCode, parseStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {UserProfile} from "./profile";
@@ -300,5 +300,17 @@ export default class Quiz {
    */
   public async save(quiz: MultipleChoiceQuestion[]): Promise<void> {
     return this.storage.set(Quiz.path, JSON.stringify(quiz));
+  }
+
+  /**
+   * Delete the saved quiz
+   * @throws {InvalidStateError} If no quiz is found
+   */
+  public async delete(): Promise<void> {
+    if (!await this.hasSavedQuiz()) {
+      throw new InvalidStateError("No saved quiz found");
+    }
+
+    return this.storage.delete(Quiz.path);
   }
 }
