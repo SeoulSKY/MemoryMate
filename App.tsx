@@ -10,7 +10,7 @@ import SignUp from "./screens/SignUp";
 import SignUp1 from "./screens/SignUp1";
 import SignUp2 from "./screens/SignUp2";
 import Home from "./screens/Home";
-import ChatScreen from "./screens/ChatScreen";
+
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 //import { View, Text, Pressable, TouchableOpacity } from "react-native";
@@ -38,11 +38,6 @@ const App = () => {
       <NavigationContainer>
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen
-              name="ChatScreen"
-              component={ChatScreen}
-              options={{ headerShown: false }}
-            />
             <Stack.Screen
               name="Home"
               component={Home}
