@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/MemoryMate.png" alt="memorymate">
+    <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/MemoryMate.png" width=300 aspect-ratio=1 alt="memorymate">
     <h1>Memory Mate</h1>
 </div>
 
