@@ -7,9 +7,15 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {SelectList} from "react-native-dropdown-select-list/index";
-import {Gender, UserProfile} from "../utils/profile";
+import {BotProfile, Gender, UserProfile} from "../utils/profile";
 import {InvalidStateError} from "../utils/error";
 import NavigationButtons from "../components/NavigationButtons";
+
+const botNames = {
+  [Gender.MALE]: ["Ben", "Charlie", "David", "Ethan", "Frank", "George", "Harry", "Ian", "Jack", "Kevin"],
+  [Gender.FEMALE]: ["Alice", "Bella", "Catherine", "Daisy", "Emily", "Fiona", "Grace", "Hannah", "Isabella", "Jasmine"],
+  [Gender.NON_BINARY]: ["Alex", "Bailey", "Charlie", "Dakota", "Eli", "Finley", "Gray", "Harper", "Indigo", "Jordan"]
+}
 
 const numInputs = 3;
 
@@ -21,12 +27,21 @@ const genderList = [
   {key: Gender.NON_BINARY, value: "Non-binary"},
 ];
 
+const ageDifferenceRange = 3;
+
 function isNameValid(name: string): boolean {
   return name.trim().length > 0;
 }
 
 function isAgeValid(age: number): boolean {
   return !isNaN(age) && Number.isInteger(age) && 0 <= age && age <= 150;
+}
+
+function randomNumberInRange(num: number, range: number) {
+  const min = num - range;
+  const max = num + range;
+
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export default function SignUp() {
@@ -167,7 +182,15 @@ export default function SignUp() {
             return;
           }
 
+          const names = botNames[gender as Gender];
+          const randomIndex = Math.floor(Math.random() * names.length);
+
           await UserProfile.getInstance().create({name, age: age as number, gender: gender as Gender});
+          await BotProfile.getInstance().create({
+            name: names[randomIndex],
+            age: randomNumberInRange(age as number, ageDifferenceRange),
+            gender: gender as Gender
+          });
 
           navigation.navigate("ChatPage");
         }}/>
@@ -183,6 +206,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     marginTop: "5%",
+    width: "90%",
   },
   title: {
     fontSize: FontSize.large,

@@ -126,7 +126,7 @@ export class BotProfile extends Profile {
       [age: number]: number[];
     }
   } = {
-    male: {
+    [Gender.MALE]: {
       40: [require("../../assets/profiles/male/40_0.png"), require("../../assets/profiles/male/40_1.png")],
       50: [require("../../assets/profiles/male/50_0.png"), require("../../assets/profiles/male/50_1.png")],
       60: [require("../../assets/profiles/male/60_0.png"), require("../../assets/profiles/male/60_1.png")],
@@ -134,7 +134,7 @@ export class BotProfile extends Profile {
       80: [require("../../assets/profiles/male/80_0.png"), require("../../assets/profiles/male/80_1.png")],
       90: [require("../../assets/profiles/male/90_0.png"), require("../../assets/profiles/male/90_1.png")],
     },
-    female: {
+    [Gender.FEMALE]: {
       40: [require("../../assets/profiles/female/40_0.png"), require("../../assets/profiles/female/40_1.png")],
       50: [require("../../assets/profiles/female/50_0.png"), require("../../assets/profiles/female/50_1.png")],
       60: [require("../../assets/profiles/female/60_0.png"), require("../../assets/profiles/female/60_1.png")],
@@ -142,7 +142,7 @@ export class BotProfile extends Profile {
       80: [require("../../assets/profiles/female/80_0.png"), require("../../assets/profiles/female/80_1.png")],
       90: [require("../../assets/profiles/female/90_0.png"), require("../../assets/profiles/female/90_1.png")],
     },
-    nonBinary: {
+    [Gender.NON_BINARY]: {
       40: [require("../../assets/profiles/non-binary/40_0.png"), require("../../assets/profiles/non-binary/40_1.png")],
       50: [require("../../assets/profiles/non-binary/50_0.png"), require("../../assets/profiles/non-binary/50_1.png")],
       60: [require("../../assets/profiles/non-binary/60_0.png"), require("../../assets/profiles/non-binary/60_1.png")],
@@ -220,7 +220,6 @@ export class BotProfile extends Profile {
       hash += data.name.charCodeAt(i);
     }
 
-    return BotProfile.profileImages[data.gender === Gender.NON_BINARY ? "nonBinary" : data.gender]
-      [age][hash % BotProfile.numImages];
+    return BotProfile.profileImages[data.gender][age][hash % BotProfile.numImages];
   }
 }

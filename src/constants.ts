@@ -6,6 +6,7 @@ export const Colour = {
   black: "black",
   gray: "gray",
   lightGray: "lightgray",
+  skyBlue: "skyblue",
   error: "red",
 };
 
