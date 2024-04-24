@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
+  TouchableOpacity, FlatList,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
@@ -15,7 +15,6 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import NavigationButtons from "../components/NavigationButtons";
 import Avatar from "../components/Avatar";
-import {FlatGrid} from "react-native-super-grid";
 
 let selections: number[] = [];
 
@@ -119,10 +118,12 @@ export default function (){
 
       <View style={styles.bottomContainer}>
         <Text style={styles.instruction}>Choose One</Text>
-        {questions && <FlatGrid
+        {questions && <FlatList
           style={styles.grid}
+          numColumns={2}
+          scrollEnabled={false}
           contentContainerStyle={styles.choiceGridContainer}
-          maxItemsPerRow={2}
+          columnWrapperStyle={styles.choiceGridContainer}
           data={questions.at(progress - 1)!.getChoices().map((choice, i) => {
             return {index: i, question: choice};
           })}
@@ -206,14 +207,14 @@ const styles = StyleSheet.create({
   choiceGridContainer: {
     justifyContent: "center",
     alignItems: "center",
+    gap: 5,
   },
   choiceButton: {
     backgroundColor: Colour.skyBlue,
     borderRadius: BorderRadius.medium,
     justifyContent: "center",
-    width: "100%",
+    width: "48%",
     aspectRatio: 1,
-    padding: "10%"
   },
   choiceText: {
     fontSize: FontSize.medium - 1,
