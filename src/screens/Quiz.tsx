@@ -167,7 +167,7 @@ export default function (){
             });
             await Quiz.getInstance().save(questions!);
 
-            navigation.navigate("Results");
+            navigation.navigate("Result");
           }}/>
       </View>
     </SafeAreaView>
