@@ -11,6 +11,12 @@ import { useNavigation, ParamListBase } from "@react-navigation/native";
 import {AppName, BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import { UserProfile } from "../utils/profile";
 import {useEffect, useState} from "react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 export default function Home() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
@@ -23,6 +29,18 @@ export default function Home() {
       }
     });
   },[]);
+
+  const scale = useSharedValue(1);
+
+  const animStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
+  useEffect(() => {
+    scale.value = withRepeat(withTiming(1.05, {duration: 500}), -1, true);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -48,21 +66,22 @@ export default function Home() {
 Chat with our friendly and helpful AI companion designed specifically for those living with dementia. 
 
 Play brain games to keep your mind sharp.`}</Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={async () => {
-            if (await UserProfile.getInstance().has()) {
-              navigation.navigate("ChatPage");
-            } else {
-              navigation.navigate("SignUp");
-            }
-          }}
-        >
-          <Text style={[styles.buttonText, styles.text]}>
-            {buttonText}
-          </Text>
-        </TouchableOpacity>
+        <Animated.View style={animStyle}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              if (await UserProfile.getInstance().has()) {
+                navigation.navigate("ChatPage");
+              } else {
+                navigation.navigate("SignUp");
+              }
+            }}
+          >
+            <Text style={[styles.buttonText, styles.text]}>
+              {buttonText}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ImageBackground>
     </View>
   );
