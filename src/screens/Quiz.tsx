@@ -31,6 +31,65 @@ export default function (){
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
+  function ChoiceGrid({choices}: {choices: string[]}) {
+    const styles = StyleSheet.create({
+      container: {
+        minHeight: "100%",
+        aspectRatio: 1,
+      },
+      grid: {
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 5,
+      },
+      button: {
+        backgroundColor: Colour.skyBlue,
+        borderRadius: BorderRadius.medium,
+        justifyContent: "center",
+        width: "48%",
+        aspectRatio: 1,
+        padding: 5,
+      },
+      text: {
+        fontSize: FontSize.medium - 1,
+        fontFamily: FontFamily.robotoMedium,
+        textAlign: "center",
+        color: Colour.black,
+      },
+      selected: {
+        borderWidth: 5,
+        borderColor: Colour.main,
+      },
+    });
+
+    return (
+      <FlatList
+        style={styles.container}
+        numColumns={2}
+        scrollEnabled={false}
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={styles.grid}
+        data={choices.map((choice, i) => {
+          return {index: i, choice: choice};
+        })}
+        renderItem={({item}) => {
+          return (
+            <TouchableOpacity
+              style={[styles.button, selected === item.index && styles.selected]}
+              onPress={() => {
+                setSelected(item.index);
+                selections[progress - 1] = item.index;
+              }}
+            >
+              <Text style={styles.text}>{item.choice}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    );
+
+  }
+
   useEffect(() => {
     selections = [];
 
@@ -118,29 +177,7 @@ export default function (){
 
       <View style={styles.bottomContainer}>
         <Text style={styles.instruction}>Choose One</Text>
-        {questions && <FlatList
-          style={styles.grid}
-          numColumns={2}
-          scrollEnabled={false}
-          contentContainerStyle={styles.choiceGridContainer}
-          columnWrapperStyle={styles.choiceGridContainer}
-          data={questions.at(progress - 1)!.getChoices().map((choice, i) => {
-            return {index: i, choice: choice};
-          })}
-          renderItem={({item}) => {
-            return (
-              <TouchableOpacity
-                style={[styles.choiceButton, selected === item.index && styles.selected]}
-                onPress={() => {
-                  setSelected(item.index);
-                  selections[progress - 1] = item.index;
-                }}
-              >
-                <Text style={styles.choiceText}>{item.choice}</Text>
-              </TouchableOpacity>
-            );
-          }}
-        />}
+        {questions && <ChoiceGrid choices={questions.at(progress - 1)!.getChoices()}/>}
         <NavigationButtons
           style={styles.navigationButtons}
           leftDisabled={progress <= 1}
@@ -199,32 +236,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.robotoMedium,
     color: Colour.main,
     marginBottom: "2%",
-  },
-  grid: {
-    minHeight: "100%",
-    aspectRatio: 1,
-  },
-  choiceGridContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 5,
-  },
-  choiceButton: {
-    backgroundColor: Colour.skyBlue,
-    borderRadius: BorderRadius.medium,
-    justifyContent: "center",
-    width: "48%",
-    aspectRatio: 1,
-  },
-  choiceText: {
-    fontSize: FontSize.medium - 1,
-    fontFamily: FontFamily.robotoMedium,
-    textAlign: "center",
-    color: Colour.black,
-  },
-  selected: {
-    borderWidth: 5,
-    borderColor: Colour.main,
   },
   navigationButtons: {
     marginTop: "5%",
