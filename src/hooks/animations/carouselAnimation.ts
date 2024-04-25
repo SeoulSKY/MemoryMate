@@ -3,7 +3,7 @@ import {useEffect} from "react";
 
 /**
  * Returns objects to play carousel animation
- * @param xValue
+ * @param xValue the value to translate the carousel by
  */
 export function useCarouselAnimation(xValue: number) {
   const translateX = useSharedValue(xValue);
