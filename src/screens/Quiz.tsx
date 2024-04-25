@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity, FlatList,
+  TouchableOpacity, FlatList, Dimensions, useWindowDimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
@@ -15,12 +15,15 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import NavigationButtons from "../components/NavigationButtons";
 import Avatar from "../components/Avatar";
+import Animated, {useAnimatedStyle, useSharedValue, withSpring} from "react-native-reanimated";
 
 let selections: number[] = [];
 
 const defaultRightButtonText = "Next";
 
 export default function (){
+  const width = useWindowDimensions().width;
+
   const [botProfile, setBotProfile] = useState<ProfileData>();
   const [questions, setQuestions] = useState<MultipleChoiceQuestion[]>();
   const [numQuestions, setNumQuestions] = useState(0);
@@ -30,6 +33,23 @@ export default function (){
   const [rightButtonText, setRightButtonText] = useState(defaultRightButtonText);
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+
+  const translateX = useSharedValue(width);
+  const animStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{translateX: translateX.value}],
+    };
+  });
+
+  function playNextQuestionAnim() {
+    translateX.value = width;
+    translateX.value = withSpring(0, {damping: 10, stiffness: 70});
+  }
+
+  function playPreviousQuestionAnim() {
+    translateX.value = -width;
+    translateX.value = withSpring(0, {damping: 10, stiffness: 70});
+  }
 
   function ChoiceGrid({choices}: {choices: string[]}) {
     const styles = StyleSheet.create({
@@ -63,8 +83,8 @@ export default function (){
     });
 
     return (
-      <FlatList
-        style={styles.container}
+      <Animated.FlatList
+        style={[styles.container, animStyle]}
         numColumns={2}
         scrollEnabled={false}
         contentContainerStyle={styles.grid}
@@ -87,10 +107,10 @@ export default function (){
         }}
       />
     );
-
   }
 
   useEffect(() => {
+    playNextQuestionAnim();
     selections = [];
 
     // BotProfile.getInstance().get().then(setBotProfile).catch(console.error);
@@ -188,6 +208,7 @@ export default function (){
               setSelected(selections[progress - 2]);
               setProgress(progress - 1);
 
+              playPreviousQuestionAnim();
               return;
             }
 
@@ -197,6 +218,7 @@ export default function (){
             if (progress < numQuestions) {
               setSelected(selections[progress]);
               setProgress(progress + 1);
+              playNextQuestionAnim();
               return;
             }
 
