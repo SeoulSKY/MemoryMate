@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity, FlatList, Dimensions, useWindowDimensions,
+  TouchableOpacity, useWindowDimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
