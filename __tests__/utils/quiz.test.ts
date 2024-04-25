@@ -6,7 +6,7 @@ import {MockStorage} from "../index";
 import Quiz, {Difficulty, MultipleChoiceQuestion} from "../../src/utils/quiz";
 import Chat, {Message} from "../../src/utils/chat";
 import {BotProfile, Gender, Participant, ProfileData, UserProfile} from "../../src/utils/profile";
-import {InvalidStateError} from "../../src/utils/error";
+import {InvalidStateError} from "../../src/utils/errors";
 import {FunctionCall, GenerativeModel} from "@google/generative-ai";
 
 const mockProfileData: ProfileData = {

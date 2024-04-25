@@ -5,7 +5,7 @@ import * as FileSystem from "expo-file-system";
 import {MockStorage} from "../index";
 
 import Image, {ImageData} from "../../src/utils/image";
-import {InvalidArgumentError} from "../../src/utils/error";
+import {InvalidArgumentError} from "../../src/utils/errors";
 
 const mockImagePath = "image.jpg";
 const mockImageJsonPath = mockImagePath.replace(".jpg", ".json");

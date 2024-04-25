@@ -2,7 +2,7 @@ import {describe, expect, it, beforeEach} from "@jest/globals";
 
 import {MockStorage} from "../index";
 import {Gender, ProfileData, UserProfile, BotProfile} from "../../src/utils/profile";
-import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
+import {InvalidArgumentError, InvalidStateError} from "../../src/utils/errors";
 
 const mockProfileData: ProfileData = {
   image: {

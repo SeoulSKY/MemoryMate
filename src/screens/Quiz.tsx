@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
+  TouchableOpacity, useWindowDimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation, ParamListBase } from "@react-navigation/native";
@@ -15,13 +15,16 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import NavigationButtons from "../components/NavigationButtons";
 import Avatar from "../components/Avatar";
-import {FlatGrid} from "react-native-super-grid";
+import Animated from "react-native-reanimated";
+import {useCarouselAnimation} from "../hooks/animations/carouselAnimation";
 
 let selections: number[] = [];
 
 const defaultRightButtonText = "Next";
 
 export default function (){
+  const width = useWindowDimensions().width;
+
   const [botProfile, setBotProfile] = useState<ProfileData>();
   const [questions, setQuestions] = useState<MultipleChoiceQuestion[]>();
   const [numQuestions, setNumQuestions] = useState(0);
@@ -31,6 +34,66 @@ export default function (){
   const [rightButtonText, setRightButtonText] = useState(defaultRightButtonText);
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+
+  const {carouselStyle, playPrevious, playNext} = useCarouselAnimation(width);
+
+  function ChoiceGrid({choices}: {choices: string[]}) {
+    const styles = StyleSheet.create({
+      container: {
+        minHeight: "100%",
+        aspectRatio: 1,
+      },
+      grid: {
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 5,
+      },
+      button: {
+        backgroundColor: Colour.skyBlue,
+        borderRadius: BorderRadius.medium,
+        justifyContent: "center",
+        width: "48%",
+        aspectRatio: 1,
+        padding: 5,
+      },
+      text: {
+        fontSize: FontSize.medium - 1,
+        fontFamily: FontFamily.robotoMedium,
+        textAlign: "center",
+        color: Colour.black,
+      },
+      selected: {
+        borderWidth: 5,
+        borderColor: Colour.main,
+      },
+    });
+
+    return (
+      <Animated.FlatList
+        style={[styles.container, carouselStyle]}
+        numColumns={2}
+        scrollEnabled={false}
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={styles.grid}
+        data={choices.map((choice, i) => {
+          return {index: i, choice: choice};
+        })}
+        renderItem={({item}) => {
+          return (
+            <TouchableOpacity
+              style={[styles.button, selected === item.index && styles.selected]}
+              onPress={() => {
+                setSelected(item.index);
+                selections[progress - 1] = item.index;
+              }}
+            >
+              <Text style={styles.text}>{item.choice}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    );
+  }
 
   useEffect(() => {
     selections = [];
@@ -119,27 +182,7 @@ export default function (){
 
       <View style={styles.bottomContainer}>
         <Text style={styles.instruction}>Choose One</Text>
-        {questions && <FlatGrid
-          style={styles.grid}
-          contentContainerStyle={styles.choiceGridContainer}
-          maxItemsPerRow={2}
-          data={questions.at(progress - 1)!.getChoices().map((choice, i) => {
-            return {index: i, question: choice};
-          })}
-          renderItem={({item}) => {
-            return (
-              <TouchableOpacity
-                style={[styles.choiceButton, selected === item.index && styles.selected]}
-                onPress={() => {
-                  setSelected(item.index);
-                  selections[progress - 1] = item.index;
-                }}
-              >
-                <Text style={styles.choiceText}>{item.question}</Text>
-              </TouchableOpacity>
-            );
-          }}
-        />}
+        {questions && <ChoiceGrid choices={questions.at(progress - 1)!.getChoices()}/>}
         <NavigationButtons
           style={styles.navigationButtons}
           leftDisabled={progress <= 1}
@@ -150,6 +193,7 @@ export default function (){
               setSelected(selections[progress - 2]);
               setProgress(progress - 1);
 
+              playPrevious();
               return;
             }
 
@@ -159,6 +203,7 @@ export default function (){
             if (progress < numQuestions) {
               setSelected(selections[progress]);
               setProgress(progress + 1);
+              playNext();
               return;
             }
 
@@ -167,7 +212,7 @@ export default function (){
             });
             await Quiz.getInstance().save(questions!);
 
-            navigation.navigate("Results");
+            navigation.navigate("Result");
           }}/>
       </View>
     </SafeAreaView>
@@ -198,32 +243,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.robotoMedium,
     color: Colour.main,
     marginBottom: "2%",
-  },
-  grid: {
-    minHeight: "100%",
-    aspectRatio: 1,
-  },
-  choiceGridContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  choiceButton: {
-    backgroundColor: Colour.skyBlue,
-    borderRadius: BorderRadius.medium,
-    justifyContent: "center",
-    width: "100%",
-    aspectRatio: 1,
-    padding: "10%"
-  },
-  choiceText: {
-    fontSize: FontSize.medium - 1,
-    fontFamily: FontFamily.robotoMedium,
-    textAlign: "center",
-    color: Colour.black,
-  },
-  selected: {
-    borderWidth: 5,
-    borderColor: Colour.main,
   },
   navigationButtons: {
     marginTop: "5%",

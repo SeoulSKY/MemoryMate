@@ -11,10 +11,13 @@ import { useNavigation, ParamListBase } from "@react-navigation/native";
 import {AppName, BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import { UserProfile } from "../utils/profile";
 import {useEffect, useState} from "react";
+import Animated from "react-native-reanimated";
+import {usePulseAnimation} from "../hooks/animations/pulseAnimation";
 
 export default function Home() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [buttonText, setButtonText] = useState("Let's get started!");
+  const {pulseStyle} = usePulseAnimation();
 
   useEffect(() => {
     UserProfile.getInstance().has().then((hasProfile) => {
@@ -48,21 +51,22 @@ export default function Home() {
 Chat with our friendly and helpful AI companion designed specifically for those living with dementia. 
 
 Play brain games to keep your mind sharp.`}</Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={async () => {
-            if (await UserProfile.getInstance().has()) {
-              navigation.navigate("ChatPage");
-            } else {
-              navigation.navigate("SignUp");
-            }
-          }}
-        >
-          <Text style={[styles.buttonText, styles.text]}>
-            {buttonText}
-          </Text>
-        </TouchableOpacity>
+        <Animated.View style={pulseStyle}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              if (await UserProfile.getInstance().has()) {
+                navigation.navigate("ChatPage");
+              } else {
+                navigation.navigate("SignUp");
+              }
+            }}
+          >
+            <Text style={[styles.buttonText, styles.text]}>
+              {buttonText}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </ImageBackground>
     </View>
   );
