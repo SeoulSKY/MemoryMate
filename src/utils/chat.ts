@@ -3,7 +3,7 @@ import {genAI, parseStatusCode} from "./index";
 import {Storage, FileStorage} from "./storage";
 import {ChatSession, Content} from "@google/generative-ai";
 import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
-import {HttpError, InvalidArgumentError, InvalidStateError} from "./error";
+import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});

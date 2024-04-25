@@ -1,4 +1,4 @@
-import {InvalidArgumentError} from "../src/utils/error";
+import {InvalidArgumentError} from "../src/utils/errors";
 import {Storage} from "../src/utils/storage";
 
 export class MockStorage<K, V> implements Storage<K, V> {

@@ -1,5 +1,5 @@
 import {FileStorage, Storage} from "./storage";
-import {HttpError, InvalidStateError} from "./error";
+import {HttpError, InvalidStateError} from "./errors";
 import {genAI, HttpStatusCode, parseStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {UserProfile} from "./profile";
@@ -66,14 +66,16 @@ export abstract class Question<Q, A> {
   /**
    * Set the answer of the question
    * @param answer The answer
+   * @returns This question for method chaining
    * @throws {InvalidStateError} If the question is already answered
    */
-  public setAnswer(answer: A): void {
+  public setAnswer(answer: A): this {
     if (this.isAnswered()) {
       throw new InvalidStateError("Question is already answered");
     }
 
     this.answer = answer;
+    return this;
   }
 
   /**
@@ -122,7 +124,7 @@ export class MultipleChoiceQuestion extends Question<string, number> {
       throw new InvalidStateError("Invalid answer choice: " + choice);
     }
 
-    super.setAnswer(choice);
+    return super.setAnswer(choice);
   }
 
   /**
@@ -298,5 +300,17 @@ export default class Quiz {
    */
   public async save(quiz: MultipleChoiceQuestion[]): Promise<void> {
     return this.storage.set(Quiz.path, JSON.stringify(quiz));
+  }
+
+  /**
+   * Delete the saved quiz
+   * @throws {InvalidStateError} If no quiz is found
+   */
+  public async delete(): Promise<void> {
+    if (!await this.hasSavedQuiz()) {
+      throw new InvalidStateError("No saved quiz found");
+    }
+
+    return this.storage.delete(Quiz.path);
   }
 }

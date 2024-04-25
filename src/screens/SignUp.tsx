@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, View} from "react-native";
+import {Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, useWindowDimensions} from "react-native";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {ParamListBase, useNavigation} from "@react-navigation/native";
 import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
@@ -8,8 +8,11 @@ import DiscreteProgressBar from "../components/DiscreteProgressBar";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {SelectList} from "react-native-dropdown-select-list/index";
 import {BotProfile, Gender, UserProfile} from "../utils/profile";
-import {InvalidStateError} from "../utils/error";
+import {InvalidStateError} from "../utils/errors";
 import NavigationButtons from "../components/NavigationButtons";
+import Animated from "react-native-reanimated";
+import {useCarouselAnimation} from "../hooks/animations/carouselAnimation";
+import {useShakeAnimation} from "../hooks/animations/shakeAnimation";
 
 const botNames = {
   [Gender.MALE]: ["Ben", "Charlie", "David", "Ethan", "Frank", "George", "Harry", "Ian", "Jack", "Kevin"],
@@ -45,6 +48,8 @@ function randomNumberInRange(num: number, range: number) {
 }
 
 export default function SignUp() {
+  const width = useWindowDimensions().width;
+
   const [progress, setProgress] = useState(1);
   const [rightButtonText, setRightButtonText] = useState(defaultRightButtonText);
   const [rightButtonDisabled, setRightButtonDisabled] = useState(true);
@@ -55,6 +60,8 @@ export default function SignUp() {
   const [gender, setGender] = useState<Gender | undefined>();
 
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  const {carouselStyle, playPrevious, playNext} = useCarouselAnimation(width);
+  const {shakeStyle, playShake} = useShakeAnimation();
 
   useEffect(() => {
     if (progress === numInputs) {
@@ -91,7 +98,7 @@ export default function SignUp() {
         keyboardVerticalOffset={-150}
       >
         {progress === 1 &&
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, carouselStyle, shakeStyle]}>
             <Text style={styles.inputLabel}>{"What is your name?"}</Text>
             <TextInput
               style={styles.input}
@@ -105,6 +112,7 @@ export default function SignUp() {
                 if (!isNameValid(text)) {
                   setError("Your name cannot be empty");
                   setRightButtonDisabled(true);
+                  playShake();
                   return;
                 }
 
@@ -113,11 +121,11 @@ export default function SignUp() {
               }}
             />
             <Text style={styles.errorLabel}>{error}</Text>
-          </View>
+          </Animated.View>
         }
 
         {progress === 2 &&
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, carouselStyle, shakeStyle]}>
             <Text style={styles.inputLabel}>{"How old are you?"}</Text>
             <TextInput
               style={[styles.input, styles.ageInput]}
@@ -133,6 +141,7 @@ export default function SignUp() {
                 if (!isAgeValid(num)) {
                   setError("Please enter a valid age");
                   setRightButtonDisabled(true);
+                  playShake();
                   return;
                 }
 
@@ -140,10 +149,10 @@ export default function SignUp() {
                 setRightButtonDisabled(false);
               }}/>
             <Text style={styles.errorLabel}>{error}</Text>
-          </View>
+          </Animated.View>
         }
         {progress === 3 &&
-          <View style={styles.inputContainer}>
+          <Animated.View style={[styles.inputContainer, carouselStyle, shakeStyle]}>
             <Text style={styles.inputLabel}>{"What is your gender?"}</Text>
             <SelectList
               placeholder={"Press here to select your gender"}
@@ -156,10 +165,12 @@ export default function SignUp() {
               dropdownStyles={{...styles.genderSelect}}
               defaultOption={gender === undefined ? undefined : genderList.find(g => g.key)}
               setSelected={setGender}
-              onSelect={() => setRightButtonDisabled(false)}
+              onSelect={() => {
+                setRightButtonDisabled(false);
+              }}
             />
             <Text style={styles.errorLabel}>{error}</Text>
-          </View>
+          </Animated.View>
         }
       </KeyboardAvoidingView>
 
@@ -170,6 +181,8 @@ export default function SignUp() {
         onLeftPress={() => {
           if (progress > 1) {
             setProgress(progress - 1);
+
+            playPrevious();
             return;
           }
 
@@ -178,6 +191,8 @@ export default function SignUp() {
         onRightPress={async () => {
           if (progress < numInputs) {
             setProgress(progress + 1);
+
+            playNext();
             return;
           }
 

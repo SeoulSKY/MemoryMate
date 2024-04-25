@@ -4,7 +4,7 @@ import {spyOn} from "jest-mock";
 import {MockStorage} from "../index";
 
 import Chat, {Message} from "../../src/utils/chat";
-import {InvalidArgumentError, InvalidStateError} from "../../src/utils/error";
+import {InvalidArgumentError, InvalidStateError} from "../../src/utils/errors";
 import {UserProfile, BotProfile, Participant, Gender} from "../../src/utils/profile";
 import {ImageData} from "../../src/utils/image";
 import { FunctionCall } from "@google/generative-ai";

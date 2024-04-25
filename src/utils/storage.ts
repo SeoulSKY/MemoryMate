@@ -1,5 +1,12 @@
-import {documentDirectory, getInfoAsync, readAsStringAsync, writeAsStringAsync, deleteAsync} from "expo-file-system";
-import {InvalidArgumentError} from "./error";
+import {
+  documentDirectory,
+  getInfoAsync,
+  readAsStringAsync,
+  writeAsStringAsync,
+  deleteAsync,
+  makeDirectoryAsync
+} from "expo-file-system";
+import {InvalidArgumentError} from "./errors";
 
 export interface Storage<K, V> {
 
@@ -66,6 +73,7 @@ export class FileStorage implements Storage<string, string> {
    * @param value The value to set
    */
   public async set(path: string, value: string): Promise<void> {
+    await makeDirectoryAsync(this.BASE_PATH + path, {intermediates: true});
     return writeAsStringAsync(this.BASE_PATH + path, value);
   }
 
