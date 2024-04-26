@@ -197,14 +197,14 @@ export default function SignUp() {
             return;
           }
 
-          const names = botNames[gender as Gender];
+          const names = botNames[gender!];
           const randomIndex = Math.floor(Math.random() * names.length);
 
-          await UserProfile.getInstance().create({name, age: age as number, gender: gender as Gender});
+          await UserProfile.getInstance().create({name, age: age!, gender: gender!});
           await BotProfile.getInstance().create({
             name: names[randomIndex],
-            age: randomNumberInRange(Math.max(minBotAge, age as number), ageDifferenceRange),
-            gender: gender as Gender
+            age: Math.max(minBotAge, randomNumberInRange(age!, ageDifferenceRange)),
+            gender: gender!,
           });
 
           navigation.navigate("ChatPage");
