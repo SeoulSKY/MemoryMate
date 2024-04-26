@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Image, Text } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Markdown from "react-native-markdown-display";
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+//import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 const ImagePicker = require("react-native-image-picker");
+import Chat from "../utils/chat";
+import {BotProfile, ProfileData} from "../utils/profile";
+import {Image} from "expo-image";
+import Avatar from "../components/Avatar";
 
 
 
 const date = new Date();
-//const API_KEY = ;
+const API_KEY = "AIzaSyBIHtFrtiGYoRp6O9vE7oxUsT4VX013Cpg";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export default function Response(props) {
@@ -30,8 +34,14 @@ export default function Response(props) {
 		<View style={styles.response}>
 			<View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
 				<View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-					<Image source={require("../../assets/profiles/male/50_0.png")} style={[styles.icon, styles.roundedImage]}  />
-					<Text style={{ fontWeight: 600 }}>Ben</Text>
+					{botProfile && <Avatar
+					imagePath={botProfile.image.path}
+					name={botProfile.name}
+					
+        />}
+				
+					{/* <Image source={require("../../assets/profiles/male/50_0.png")} style={[styles.icon, styles.roundedImage]}  />
+					<Text style={{ fontWeight: 600 }}>Ben</Text> */}
 				</View>
 				<Text style={{ fontSize: 10, fontWeight: "600" }}>
 					{date.getHours()}:{date.getMinutes()}

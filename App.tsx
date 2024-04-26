@@ -10,7 +10,7 @@ import Loading from "./src/screens/Loading";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
 import ChatPage from "./src/screens/ChatPage";
-
+import ChatGifted from "./src/screens/ChatGifted";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const App = () => {
@@ -37,6 +37,11 @@ const App = () => {
         {hideSplashScreen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
+              name="ChatGifted"
+              component={ChatGifted}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="Home"
               component={Home}
               options={{ headerShown: false }}
@@ -61,6 +66,7 @@ const App = () => {
               component={ChatPage}
               options={{ headerShown: false }}
             />
+        
             <Stack.Screen
               name="SignUp"
               component={SignUp}

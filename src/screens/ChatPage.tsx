@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
-  StyleSheet, Text, View, Image, FlatList, TextInput, TouchableOpacity
+  StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity
 } from "react-native";
 import Response from "../components/response";
 import Message from "../components/message";
@@ -9,6 +9,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import KeyboardAvoidingViewContainer from "../components/KeyboardAvoidingViewContainer";
 import { FontAwesome6 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import Chat from "../utils/chat";
+import {BotProfile, ProfileData} from "../utils/profile";
+import {Image} from "expo-image";
 
 
 
@@ -42,7 +45,15 @@ const ChatPage = () => {
       // setImage(result.assets[0].uri);
     }
   };
-  
+
+  const [botProfile, setBotProfile] = useState<ProfileData>();
+
+  useEffect(() => {
+    BotProfile.getInstance().get().then((profile) => {
+      setBotProfile(profile);
+    }
+  ),[]});
+
 
 
   return (
@@ -50,8 +61,8 @@ const ChatPage = () => {
       <View style={styles.container}>
         <StatusBar style="auto" />
         <View style={styles.header}>
-          <Image source={require("../../assets/profiles/male/40_0.png")} style={[styles.icon, styles.roundedImage]}  />
-          <Text style={{ fontSize: 20, fontWeight: "400", color: "#323232" }}>Ben</Text>
+          {botProfile && <Image source={botProfile.image!.path} style={[styles.icon, styles.roundedImage]}  />}
+          {botProfile &&<Text style={{ fontSize: 20, fontWeight: "400", color: "#323232" }}>{botProfile.name}</Text>}
         </View>
         <FlatList
           style={{ paddingHorizontal: 16, marginBottom: 80 }}
