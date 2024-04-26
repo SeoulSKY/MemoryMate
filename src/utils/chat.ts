@@ -28,7 +28,7 @@ function getInstruction(bot: ProfileData, user: ProfileData): Content {
   and their events as possible that will be used to personalize a set of questions and answers for their brain exercise 
   (It's not your task though). Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an 
   age ${bot.age}. Try to hide your actual intention and act as if you want to talk with them rather than retrieve 
-  information. Do not include your expression in the message`}]};
+  information. Do not include your expression in the message. Start your message with greeting`}]};
 }
 
 export default class Chat {
@@ -51,6 +51,7 @@ export default class Chat {
    * @param storageType The storage type
    * @returns The chat instance
    * @throws {InvalidStateError} If either bot or user profile does not exist
+   * @throws {HttpError} If failed to send the message
    */
   public static async getInstance(storageType: new () => Storage<string, string> = FileStorage): Promise<Chat> {
     if (this.instance !== undefined) {
@@ -67,17 +68,24 @@ export default class Chat {
 
     this.instance = new Chat(storageType);
 
-    const history = [
-      getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
-    ];
-
     if (await this.instance.hasHistory()) {
+      const history = [
+        getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
+      ];
+
       for (const message of await this.instance.getHistory()) {
         history.push({role: message.author === Participant.USER ? "user" : "model", parts: [{text: message.text}]});
       }
-    }
 
-    this.instance.session = model.startChat({history: history});
+      this.instance.session = model.startChat({history: history});
+    } else {
+      this.instance.session = model.startChat();
+
+      const bot = await BotProfile.getInstance().get();
+      const user = await UserProfile.getInstance().get();
+      const response = await this.instance.send(getInstruction(bot, user).parts[0].text!);
+      await this.instance.save([{author: Participant.BOT, text: response, images: [], timestamp: new Date()}])
+    }
 
     return this.instance;
   }
@@ -102,15 +110,7 @@ export default class Chat {
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
-    let response;
-    try {
-      response = (await this.session.sendMessage(prompt)).response.text();
-    } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
-      }
-      throw e;
-    }
+    const response = await this.send(prompt);
 
     const history = await this.hasHistory() ? await this.getHistory() : [];
     history.push({author: Participant.USER, text: message, images, timestamp});
@@ -118,6 +118,23 @@ export default class Chat {
     await this.save(history);
 
     return history.pop()!;
+  }
+
+  /**
+   * Send a message to the chatbot
+   * @param text The message to send
+   * @returns The response from the chatbot
+   * @throws {HttpError} If failed to send the message
+   */
+  private async send(text: string): Promise<string> {
+    try {
+      return (await this.session.sendMessage(text)).response.text();
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new HttpError(e.message, parseStatusCode(e));
+      }
+      throw e;
+    }
   }
 
   /**
