@@ -84,7 +84,7 @@ export default class Chat {
       const bot = await BotProfile.getInstance().get();
       const user = await UserProfile.getInstance().get();
       const response = await this.instance.send(getInstruction(bot, user).parts[0].text!);
-      await this.instance.save([{author: Participant.BOT, text: response, images: [], timestamp: new Date()}])
+      await this.instance.save([{author: Participant.BOT, text: response, images: [], timestamp: new Date()}]);
     }
 
     return this.instance;
