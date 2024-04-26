@@ -9,6 +9,7 @@ import Result from "./src/screens/Result";
 import Loading from "./src/screens/Loading";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
+import ChatPage from "./src/screens/ChatPage";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -55,11 +56,11 @@ const App = () => {
               component={Loading}
               options={{ headerShown: false }}
             />
-            {/*<Stack.Screen*/}
-            {/*  name="ChatPage"*/}
-            {/*  component={ChatPage}*/}
-            {/*  options={{ headerShown: false }}*/}
-            {/*/>*/}
+            <Stack.Screen
+              name="ChatPage"
+              component={ChatPage}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="SignUp"
               component={SignUp}

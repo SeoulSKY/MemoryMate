@@ -1,4 +1,145 @@
-import * as React from "react";
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import {
+  StyleSheet, Text, View, Image, FlatList, TextInput, TouchableOpacity
+} from "react-native";
+import Response from "../components/response";
+import Message from "../components/message";
+import { MaterialIcons } from "@expo/vector-icons";
+import KeyboardAvoidingViewContainer from "../components/KeyboardAvoidingViewContainer";
+import { FontAwesome6 } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+
+
+
+
+const ChatPage = () => {
+  const [inputText, setInputText] = useState("");
+  const [listData, setListData] = useState<string[]>([]);
+
+
+  const searchInput = () => {
+    setListData((prevList) => [...prevList, inputText]);
+    setInputText("");
+  };
+
+  //const [image, setImage] = useState<string | null>(null);
+
+  
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      // setImage(result.assets[0].uri);
+    }
+  };
+  
+
+
+  return (
+    <KeyboardAvoidingViewContainer>
+      <View style={styles.container}>
+        <StatusBar style="auto" />
+        <View style={styles.header}>
+          <Image source={require("../../assets/profiles/male/40_0.png")} style={[styles.icon, styles.roundedImage]}  />
+          <Text style={{ fontSize: 20, fontWeight: "400", color: "#323232" }}>Ben</Text>
+        </View>
+        <FlatList
+          style={{ paddingHorizontal: 16, marginBottom: 80 }}
+          data={listData}
+          renderItem={({ item }) => (
+            <View>
+              <Message message={item} />
+              {/* {image && <Image source={{ uri: image }} style={styles.image} />} */}
+              <Response prompt={item} />
+            </View>
+          
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+        <View style={styles.searchBar}>
+          <TouchableOpacity onPress={pickImage}> 
+            <FontAwesome6 name="image" size={20} color="black" />
+          </TouchableOpacity>
+        
+    
+          <TextInput
+            placeholder="Speak with Ben"
+            style={styles.input}
+            value={inputText}
+            onChangeText={(text) => setInputText(text)}
+            selectionColor="#323232"
+          />
+          <TouchableOpacity onPress={searchInput}>
+            <MaterialIcons name="send" size={20} color="black" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingViewContainer>
+    
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    gap: 16,
+    paddingTop: 36,
+  },
+  image: {
+    width: 200,
+    height: 200,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    margin: 8,
+    gap: 8,
+  },
+  icon: {
+    width: 32,
+    height: 32,
+  },
+  searchBar: {
+    backgroundColor: "#ffffff",
+    width: "100%",
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 60,
+    paddingVertical: 16,
+    gap: 8,
+  },
+  input: {
+    backgroundColor: "#fff",
+    width: "100%",
+    fontSize: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 32,
+    borderWidth: 0.1,
+  },
+  roundedImage: {
+    borderRadius: 50, 
+  },
+});
+
+export default ChatPage;
+
+
+/* import * as React from "react";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -529,3 +670,4 @@ const styles = StyleSheet.create({
 });
 
 export default ChatPage;
+ */
