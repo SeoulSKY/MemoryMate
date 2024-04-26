@@ -1,13 +1,12 @@
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {spyOn} from "jest-mock";
 
-import {MockStorage} from "../index";
+import {mockChatSession, MockStorage} from "../index";
 
 import Chat, {Message} from "../../src/utils/chat";
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/errors";
 import {UserProfile, BotProfile, Participant, Gender} from "../../src/utils/profile";
 import {ImageData} from "../../src/utils/image";
-import { FunctionCall } from "@google/generative-ai";
 
 const mockProfileData = {
   name: "test",
@@ -42,22 +41,12 @@ describe("Chat", () => {
     await UserProfile.getInstance(MockStorage).create(mockProfileData);
     await BotProfile.getInstance(MockStorage).create(mockProfileData);
 
+    mockChatSession();
+
     chat = await Chat.getInstance(MockStorage);
 
     storage = new MockStorage();
     chat["storage"] = storage;
-
-    spyOn(chat["session"], "sendMessage")
-      .mockResolvedValue({
-        response: {
-          text: () => "response",
-          functionCalls: function (): FunctionCall[] | undefined {
-            throw new Error("Function not implemented.");
-          },
-          functionCall: function (): FunctionCall | undefined {
-            throw new Error("Function not implemented.");
-          }
-        }});
 
     // @ts-expect-error for testing purposes
     spyOn(chat, "getImageDescriptions").mockResolvedValue(Promise.resolve("image descriptions"));

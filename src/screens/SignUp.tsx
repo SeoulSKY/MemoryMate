@@ -31,6 +31,7 @@ const genderList = [
 ];
 
 const ageDifferenceRange = 3;
+const minBotAge = 40;
 
 function isNameValid(name: string): boolean {
   return name.trim().length > 0;
@@ -202,7 +203,7 @@ export default function SignUp() {
           await UserProfile.getInstance().create({name, age: age as number, gender: gender as Gender});
           await BotProfile.getInstance().create({
             name: names[randomIndex],
-            age: randomNumberInRange(age as number, ageDifferenceRange),
+            age: randomNumberInRange(Math.max(minBotAge, age as number), ageDifferenceRange),
             gender: gender as Gender
           });
 
