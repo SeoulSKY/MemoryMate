@@ -88,12 +88,12 @@ export default function (){
                 selections[progress - 1] = item.index;
               }}
             >
-            <Text
-              style={styles.text}
-              ellipsizeMode={"tail"}
-              numberOfLines={100}
-              adjustsFontSizeToFit
-            >{item.choice}</Text>
+              <Text
+                style={styles.text}
+                ellipsizeMode={"tail"}
+                numberOfLines={100}
+                adjustsFontSizeToFit
+              >{item.choice}</Text>
             </TouchableOpacity>
           );
         }}
@@ -127,7 +127,8 @@ export default function (){
       new MultipleChoiceQuestion(
         "Peter, you mentioned your daughter recommended the app to you. What was her reason?",
         Difficulty.NORMAL,
-        ["It's a great way to stay connected with your family", "It can help with dementia", "It allows you to learn new languages", "It's a fun way to pass the time"],
+        ["It's a great way to stay connected with your family", "It can help with dementia",
+          "It allows you to learn new languages", "It's a fun way to pass the time"],
         1,
       ),
       new MultipleChoiceQuestion(
