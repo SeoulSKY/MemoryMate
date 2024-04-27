@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     marginHorizontal: "2%",
   },
   textBackground: {
-    backgroundColor: Colour.skyBlue,
+    backgroundColor: Colour.secondary,
     borderRadius: BorderRadius.medium,
     borderTopLeftRadius: 0,
     minWidth: "100%",

@@ -246,12 +246,12 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: FontSize.medium,
     fontFamily: FontFamily.gothicA1Bold,
-    color: Colour.main,
+    color: Colour.primary,
     marginBottom: "2%",
   },
   input: {
     borderWidth: 3,
-    borderColor: Colour.main,
+    borderColor: Colour.primary,
     borderRadius: BorderRadius.medium,
     paddingHorizontal: "5%",
     paddingVertical: "4%",
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   genderSelect: {
     borderWidth: 3,
-    borderColor: Colour.main,
+    borderColor: Colour.primary,
     borderRadius: BorderRadius.medium,
     minWidth: "50%",
   },

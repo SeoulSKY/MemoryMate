@@ -49,12 +49,12 @@ export default function (){
         gap: 5,
       },
       button: {
-        backgroundColor: Colour.skyBlue,
+        backgroundColor: Colour.secondary,
         borderRadius: BorderRadius.medium,
         justifyContent: "center",
         width: "48%",
         aspectRatio: 1,
-        padding: 5,
+        padding: 10,
       },
       text: {
         fontSize: FontSize.medium - 1,
@@ -64,7 +64,8 @@ export default function (){
       },
       selected: {
         borderWidth: 5,
-        borderColor: Colour.main,
+        borderColor: Colour.primary,
+        padding: 5,
       },
     });
 
@@ -87,7 +88,12 @@ export default function (){
                 selections[progress - 1] = item.index;
               }}
             >
-              <Text style={styles.text}>{item.choice}</Text>
+            <Text
+              style={styles.text}
+              ellipsizeMode={"tail"}
+              numberOfLines={100}
+              adjustsFontSizeToFit
+            >{item.choice}</Text>
             </TouchableOpacity>
           );
         }}
@@ -119,6 +125,18 @@ export default function (){
 
     setQuestions([
       new MultipleChoiceQuestion(
+        "Peter, you mentioned your daughter recommended the app to you. What was her reason?",
+        Difficulty.NORMAL,
+        ["It's a great way to stay connected with your family", "It can help with dementia", "It allows you to learn new languages", "It's a fun way to pass the time"],
+        1,
+      ),
+      new MultipleChoiceQuestion(
+        "How old are you?",
+        Difficulty.EASY,
+        ["52", "62", "72", "82"],
+        1,
+      ),
+      new MultipleChoiceQuestion(
         "So, I went to the market today. It was crowded. Where did you go yesterday?",
         Difficulty.EASY,
         ["Library", "Mary's House", "Stayed at Home", "Swimming Pool"],
@@ -141,6 +159,24 @@ export default function (){
         Difficulty.NORMAL,
         ["Paris", "London", "Berlin", "Madrid"],
         2,
+      ),
+      new MultipleChoiceQuestion(
+        "What is the capital of England?",
+        Difficulty.NORMAL,
+        ["Paris", "London", "Berlin", "Madrid"],
+        1,
+      ),
+      new MultipleChoiceQuestion(
+        "What is the capital of England?",
+        Difficulty.NORMAL,
+        ["Paris", "London", "Berlin", "Madrid"],
+        1,
+      ),
+      new MultipleChoiceQuestion(
+        "What is the capital of England?",
+        Difficulty.NORMAL,
+        ["Paris", "London", "Berlin", "Madrid"],
+        1,
       ),
       new MultipleChoiceQuestion(
         "What is the capital of England?",
@@ -185,6 +221,7 @@ export default function (){
         {questions && <ChoiceGrid choices={questions.at(progress - 1)!.getChoices()}/>}
         <NavigationButtons
           style={styles.navigationButtons}
+          showLeft={progress > 1}
           leftDisabled={progress <= 1}
           rightDisabled={selected === undefined}
           rightText={rightButtonText}
@@ -241,7 +278,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: FontSize.medium,
     fontFamily: FontFamily.robotoMedium,
-    color: Colour.main,
+    color: Colour.primary,
     marginBottom: "2%",
   },
   navigationButtons: {

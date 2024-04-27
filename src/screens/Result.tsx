@@ -106,7 +106,7 @@ export default function Result() {
           radius={100}
           valueSuffix={"%"}
           progressValueColor={Colour.gray}
-          activeStrokeColor={Colour.main}
+          activeStrokeColor={Colour.primary}
           inActiveStrokeColor={Colour.lightGray}
           inActiveStrokeWidth={20}
           activeStrokeWidth={30}
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.large + 5,
   },
   button: {
-    backgroundColor: Colour.main,
+    backgroundColor: Colour.primary,
     borderRadius: BorderRadius.small,
     marginTop: "auto",
     marginBottom: "10%",
