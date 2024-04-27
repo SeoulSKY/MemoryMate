@@ -184,12 +184,13 @@ export default class Quiz {
 
     const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
     evaluation of the patient's dementia level above, create personalized multiple-choice questions for a memory game 
-    from the facts or events extracted by the chat history with the proper mixture of difficulties while considering 
-    their dementia level. The entire output must be formatted as a minified JSON, containing a list of 
+    from the patient's facts or events extracted by the chat history with the proper mixture of difficulties while 
+    considering their dementia level. The entire output must be formatted as a minified JSON, containing a list of 
     ${Quiz.numQuestions} questions with ${Quiz.numChoices} choices, its difficulty level between 1 and 
     ${Object.keys(Difficulty).length / 2} and an index to the correct choice. The object keys must be question, 
-    difficulty, choices and correctAnswer. Do not start your output with \`\`\`json and start with an open 
-    square bracket.`;
+    difficulty, choices and correctAnswer. Do not create questions and choices in the third person point of view. 
+    The chatbot is asking the question and the patient is making a choice. 
+    Do not start your output with \`\`\`json and start with an open square bracket.`;
 
     let response: string;
     try {
@@ -202,7 +203,7 @@ export default class Quiz {
     }
 
     // sometimes, the response is wrapped with ```json ```, a markdown syntax
-    response = response.replace(/^```json\s*```$/, "");
+    response = response.replace(/^```json\s*```$/i, "");
 
     interface Response {
       question: string,

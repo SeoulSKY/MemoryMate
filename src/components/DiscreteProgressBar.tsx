@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     marginHorizontal: "2%"
   },
   active: {
-    backgroundColor: Colour.main,
+    backgroundColor: Colour.primary,
   },
   inactive: {
     backgroundColor: Colour.gray,

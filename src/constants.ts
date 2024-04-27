@@ -1,7 +1,8 @@
 export const AppName = "Memory Mate";
 
 export const Colour = {
-  main: "#a475c1",
+  primary: "#a475c1",
+  secondary: "#B7C9F2",
   white: "white",
   black: "black",
   gray: "gray",

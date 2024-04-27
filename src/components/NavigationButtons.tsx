@@ -3,6 +3,8 @@ import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import {StyleSheet} from "react-native";
 
 interface Props {
+  showLeft?: boolean;
+  showRight?: boolean;
   leftDisabled?: boolean;
   rightDisabled?: boolean;
   leftText?: string;
@@ -14,6 +16,8 @@ interface Props {
 
 export default function NavigationButtons(
   {
+    showLeft = true,
+    showRight = true,
     leftDisabled = false,
     rightDisabled = false,
     leftText="Back",
@@ -25,14 +29,14 @@ export default function NavigationButtons(
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
-        style={[styles.button, styles.left, leftDisabled && styles.disabled]}
+        style={[styles.button, styles.left, leftDisabled && styles.disabled, !showLeft && styles.hidden]}
         disabled={leftDisabled}
         onPress={onLeftPress}
       >
         <Text style={[styles.text, styles.leftText]}>{leftText}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.button, styles.right, rightDisabled && styles.disabled]}
+        style={[styles.button, styles.right, rightDisabled && styles.disabled, !showRight && styles.hidden]}
         disabled={rightDisabled}
         onPress={onRightPress}
       >
@@ -61,6 +65,9 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
+  hidden: {
+    opacity: 0,
+  },
   left: {
     backgroundColor: Colour.lightGray,
   },
@@ -68,7 +75,7 @@ const styles = StyleSheet.create({
     color: Colour.gray,
   },
   right: {
-    backgroundColor: Colour.main,
+    backgroundColor: Colour.primary,
   },
   rightText: {
     color: Colour.white,
