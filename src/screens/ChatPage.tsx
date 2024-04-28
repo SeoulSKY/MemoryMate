@@ -76,13 +76,13 @@ export default function ChatPage() {
   const onSend = useCallback((messages: IMessage[] = []) => {
 
    
-      console.log("messege+++++" + messages[0].image);
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages,messages),
-      );
+    console.log("messege+++++" + messages[0].image);
+    setMessages(previousMessages =>
+      GiftedChat.append(previousMessages,messages),
+    );
 
-      setImage("");
-      setIsAttachImage(false);
+    setImage("");
+    setIsAttachImage(false);
     
    
   }, []);
@@ -109,7 +109,7 @@ export default function ChatPage() {
         renderMessageImage={props => {return(
           isAttachImage == true && (
             <Image
-            {...props}
+              {...props}
               source={{ uri: image }}
               style={{ width: 200, height: 200, borderRadius: 10 }}
             />
@@ -140,7 +140,7 @@ export default function ChatPage() {
               }}>
              
 
-              </Bubble>
+            </Bubble>
             
           );
         }}
