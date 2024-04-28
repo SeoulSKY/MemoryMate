@@ -188,7 +188,6 @@ export default function ChatPage() {
               {image &&<TouchableOpacity 
                 onPress={() => setImage(undefined)}
                 style={styles.removePickedImage}
-
               >
                   
                 <Text >X</Text>
