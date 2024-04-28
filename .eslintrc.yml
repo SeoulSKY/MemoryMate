@@ -37,7 +37,6 @@ rules:
     - error
   func-style:
     - error
-    - declaration:
-      - function
+    - declaration
   prefer-arrow-callback:
     - error

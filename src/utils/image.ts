@@ -2,11 +2,13 @@ import {copyAsync} from "expo-file-system";
 import {FileStorage, Storage} from "./storage";
 import {InvalidArgumentError} from "./errors";
 
+export type MimeType = "image/png" | "image/jpeg" | "image/gif";
+
 export interface ImageData {
   readonly path: string | number,
   readonly width: number,
   readonly height: number,
-  readonly mimeType: "image/png" | "image/jpeg" | "image/gif",
+  readonly mimeType: MimeType,
 }
 
 export default class Image {
