@@ -28,7 +28,7 @@ import {Icon} from "react-native-elements";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [image, setImage] = useState<string | undefined>(undefined);
+  const [image, setImage] = useState<string >();
   const [isAttachImage, setIsAttachImage] = useState(false);
 
   const [botProfile, setBotProfile] = useState<ProfileData>();
@@ -68,40 +68,24 @@ export default function ChatPage() {
           name:  botProfile && botProfile.name,
           avatar: botProfile && botProfile.image!.path,
         },
-        image: "",
+        image: image,
       },
     ]);
   }, []);
 
   const onSend = useCallback((messages: IMessage[] = []) => {
-    //const [messageToSend] = messages;
-    if(isAttachImage){
-      console.log("images are attachtched" + isAttachImage);
-      /*  const newMessage = {
-        _id: Number(messages[0]._id) + 1,
-        text: messages[0].text,
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          avatar: '',
-        },
-        image: image,
-       
-      };
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, newMessage),
-      ); */
-      setIsAttachImage(false);
-      setImage("");
 
-    }else{
-      console.log(messages);
-      setMessages(previousMessages =>
-        GiftedChat.append(previousMessages, messages),
-      );
-    }
    
-  }, [image, isAttachImage]);
+      console.log("messege+++++" + messages[0].image);
+      setMessages(previousMessages =>
+        GiftedChat.append(previousMessages,messages),
+      );
+
+      setImage("");
+      setIsAttachImage(false);
+    
+   
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,6 +106,16 @@ export default function ChatPage() {
           avatar: botProfile && botProfile.image!.path,
           
         }}
+        renderMessageImage={props => {return(
+          isAttachImage == true && (
+            <Image
+            {...props}
+              source={{ uri: image }}
+              style={{ width: 200, height: 200, borderRadius: 10 }}
+            />
+          )
+        );}}
+       
         renderBubble={props => {
           return (
             <Bubble
@@ -143,8 +137,11 @@ export default function ChatPage() {
                   backgroundColor: Colour.primary,
                     
                 }
-              }}
-            />
+              }}>
+             
+
+              </Bubble>
+            
           );
         }}
         renderActions={props=>{
