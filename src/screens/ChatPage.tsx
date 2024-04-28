@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Actions, Bubble, GiftedChat, IMessage, InputToolbar, Send} from "react-native-gifted-chat";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {StyleSheet, View} from "react-native";
+import {StyleSheet, TouchableOpacity, View, Text} from "react-native";
 import {Colour} from "../constants";
 import {Feather, Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -9,14 +9,20 @@ import {Gender, ProfileData} from "../utils/profile";
 import {Image} from "expo-image";
 import {ImageData, MimeType} from "../utils/image";
 import Avatar from "../components/Avatar";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation, ParamListBase } from "@react-navigation/native";
+
 
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [image, setImage] = useState<ImageData>();
-
   const [botProfile, setBotProfile] = useState<ProfileData>();
+  const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
+  /**
+   * Set the bot profile and the initial message
+   */
   useEffect(() => {
     setBotProfile({
       name: "Ben",
@@ -50,7 +56,9 @@ export default function ChatPage() {
   //   }
   //   ),[];});
 
-
+  /**
+   * Pick an image from the image library
+   */
   async function pickImage(): Promise<ImageData | null> {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -72,10 +80,17 @@ export default function ChatPage() {
     })[0];
   }
 
+  /**
+   * Render the chat page
+   */
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="arrow-back-sharp" size={30} color="black" />
+        <Ionicons name="arrow-back-sharp" size={30} color="black" onPress={async () => {
+              
+          navigation.navigate("Home");
+              
+        }} />
         {botProfile && <Avatar imagePath={botProfile.image!.path} name={botProfile.name}/>}
       </View>
     
@@ -168,8 +183,16 @@ export default function ChatPage() {
         }}
         renderChatFooter={() => {
           return (
-            <View>
-              {image && <Image source={image.path} style={{width: 200, height: 200}}/>}
+            <View style ={{backgroundColor:Colour.lightGray,margin:15}}>
+              {image && <Image source={image.path} style={styles.pickedImage}/>}
+              {image &&<TouchableOpacity 
+                onPress={() => setImage(undefined)}
+                style={styles.removePickedImage}
+
+              >
+                  
+                <Text >X</Text>
+              </TouchableOpacity>}
             </View>
           );
         }}
@@ -206,4 +229,21 @@ const styles = StyleSheet.create({
   roundedImage: {
     borderRadius: 50,
   },
+  pickedImage: {
+    width: 100, 
+    height: 100, 
+    backgroundColor:Colour.lightGray, 
+    marginBottom:25, 
+    marginLeft:20
+  },
+  removePickedImage:{
+    width: 20, 
+    height: 20, 
+    backgroundColor: Colour.white, 
+    borderRadius: 50, 
+    alignItems: "center",  
+    position:"absolute", 
+    marginLeft: 15
+  },
+  
 });
