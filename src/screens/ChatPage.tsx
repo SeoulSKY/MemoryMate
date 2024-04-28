@@ -123,7 +123,6 @@ export default function ChatPage() {
                 },
                 right:{
                   backgroundColor: Colour.primary,
-                    
                 }
               }}>
             </Bubble>
@@ -134,19 +133,18 @@ export default function ChatPage() {
             <Actions 
               {...props}
               icon={() => <Feather name="image" size={28} color="black" />}
-              options={{"Choose From Library": async () => {
-                console.log("Choose From Library");
-                const image = await pickImage();
-                if (image !== null) {
-                  setImage(image);
-                }
-              },
-              Cancel: () => {
-                console.log("Cancel");
-              },}}
-            >
-            </Actions>
-         
+              options={{
+                "Choose From Library": async () => {
+                  const image = await pickImage();
+                  if (image !== null) {
+                    setImage(image);
+                  }
+                },
+                Cancel: () => {
+
+                },
+              }}
+            />
           );
         }}
         renderSend={props=> {
