@@ -6,14 +6,13 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import Quiz from "./src/screens/Quiz";
 import Result from "./src/screens/Result";
-import Loading from "./src/screens/Loading";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
 import ChatPage from "./src/screens/ChatPage";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const App = () => {
+export default function App() {
   const [hideSplashScreen] = React.useState(true);
 
   const [fontsLoaded, error] = useFonts({
@@ -52,11 +51,6 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="Loading"
-              component={Loading}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
               name="ChatPage"
               component={ChatPage}
               options={{ headerShown: false }}
@@ -71,5 +65,4 @@ const App = () => {
       </NavigationContainer>
     </SafeAreaProvider>
   );
-};
-export default App;
+}

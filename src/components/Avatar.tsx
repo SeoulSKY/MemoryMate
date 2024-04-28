@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "flex-start",
+    minWidth: "100%",
   },
   avatarContainer: {
     flexDirection: "row",

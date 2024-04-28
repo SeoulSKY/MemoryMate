@@ -33,3 +33,10 @@ rules:
   eol-last:
     - error
     - always
+  prefer-const:
+    - error
+  func-style:
+    - error
+    - declaration
+  prefer-arrow-callback:
+    - error

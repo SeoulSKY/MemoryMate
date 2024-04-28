@@ -1,63 +1,35 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { GiftedChat, IMessage } from "react-native-gifted-chat";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-
-  StyleSheet,
-  TouchableOpacity,
- 
-} from "react-native";
-
-import { Bubble } from "react-native-gifted-chat";
+import React, {useEffect, useState} from "react";
+import {Actions, Bubble, GiftedChat, IMessage, InputToolbar, Send} from "react-native-gifted-chat";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {StyleSheet, View} from "react-native";
 import {Colour} from "../constants";
-import { InputToolbar } from "react-native-gifted-chat";
-import { Text } from "react-native";
-import { View } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { Actions } from "react-native-gifted-chat";
+import {Feather, Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import {BotProfile, ProfileData} from "../utils/profile";
+import {Gender, ProfileData} from "../utils/profile";
 import {Image} from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import { Send } from "react-native-gifted-chat";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {Icon} from "react-native-elements";
-
-
+import {ImageData, MimeType} from "../utils/image";
+import Avatar from "../components/Avatar";
 
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [image, setImage] = useState<string >();
-  const [isAttachImage, setIsAttachImage] = useState(false);
+  const [image, setImage] = useState<ImageData>();
 
   const [botProfile, setBotProfile] = useState<ProfileData>();
 
   useEffect(() => {
-    BotProfile.getInstance().get().then((profile) => {
-      setBotProfile(profile);
-    }
-    ),[];});
-
-
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+    setBotProfile({
+      name: "Ben",
+      image: {
+        path: require("../../assets/profiles/male/40_0.png"),
+        width: 256,
+        height: 256,
+        mimeType: "image/png",
+      },
+      age: 40,
+      gender: Gender.MALE,
     });
 
-    console.log(result);
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setIsAttachImage(true);
-    }
-  };
-
-  useEffect(() => {
     setMessages([
       {
         _id: 1,
@@ -68,53 +40,69 @@ export default function ChatPage() {
           name:  botProfile && botProfile.name,
           avatar: botProfile && botProfile.image!.path,
         },
-        image: image,
       },
     ]);
   }, []);
 
-  const onSend = useCallback((messages: IMessage[] = []) => {
+  // useEffect(() => {
+  //   BotProfile.getInstance().get().then((profile) => {
+  //     setBotProfile(profile);
+  //   }
+  //   ),[];});
 
-   
-    console.log("messege+++++" + messages[0].image);
-    setMessages(previousMessages =>
-      GiftedChat.append(previousMessages,messages),
-    );
 
-    setImage("");
-    setIsAttachImage(false);
-    
-   
-  }, []);
+  async function pickImage(): Promise<ImageData | null> {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return null;
+    }
+
+    return result.assets.map(asset => {
+      return {
+        path: asset.uri,
+        width: asset.width,
+        height: asset.height,
+        mimeType: asset.mimeType as MimeType,
+      };
+    })[0];
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Ionicons name="arrow-back-sharp" size={30} color="black" />
-        {botProfile && <Image source={botProfile.image!.path} style={[styles.icon, styles.roundedImage]}  />}
-        {botProfile &&<Text style={{ fontSize: 20, fontWeight: "400", color: "#323232" }}>{botProfile.name}</Text>}
+        {botProfile && <Avatar imagePath={botProfile.image!.path} name={botProfile.name}/>}
       </View>
     
       <GiftedChat
         messages={messages}
-        onSend={messages => onSend(messages)}          
-        renderUsernameOnMessage={true} 
+        onSend={messages => {
+          const message = messages[0];
+          if (image !== undefined) {
+            message.image = image.path as string;
+          }
+
+          setMessages(previousMessages => [message, ...previousMessages]);
+
+          setImage(undefined);
+        }}
+        renderUsernameOnMessage={true}
         renderAvatarOnTop={true}
         user={{
           _id: 1,
-          name:  botProfile && botProfile.name,
-          avatar: botProfile && botProfile.image!.path,
-          
         }}
-        renderMessageImage={props => {return(
-          isAttachImage == true && (
-            <Image
-              {...props}
-              source={{ uri: image }}
-              style={{ width: 200, height: 200, borderRadius: 10 }}
-            />
-          )
-        );}}
+        renderMessageImage={props =>
+          <Image
+            {...props}
+            source={props.currentMessage?.image}
+            style={{width: 200, height: 200, borderRadius: 10}}
+          />
+        }
        
         renderBubble={props => {
           return (
@@ -138,64 +126,51 @@ export default function ChatPage() {
                     
                 }
               }}>
-             
-
             </Bubble>
-            
           );
         }}
         renderActions={props=>{
           return(
             <Actions 
               {...props}
-              icon={()=>{return(<Feather name="image" size={28} color="black" />);}}
-              options={{"Choose From Library": () => {
-                pickImage();
+              icon={() => <Feather name="image" size={28} color="black" />}
+              options={{"Choose From Library": async () => {
                 console.log("Choose From Library");
+                const image = await pickImage();
+                if (image !== null) {
+                  setImage(image);
+                }
               },
               Cancel: () => {
                 console.log("Cancel");
               },}}
-                
-            
             >
-
             </Actions>
          
           );
         }}
-        renderSend = {props=> {
+        renderSend={props=> {
           return (
-            <Send
-              {...props}
-            >
-              <View style={{flexDirection: "row"}}>
-                <TouchableOpacity onPress={pickImage}>
-                  <Icon
-                    type="font-awesome"
-                    name="paperclip"
-                    //style={styles.paperClip}
-                    size={28}
-                    color='blue'
-                  />
-                </TouchableOpacity>
-                   
-                  
-                <View style={{marginRight: 10, marginBottom: 4}}>
-                  <MaterialCommunityIcons name="send-circle-outline" size={34} color="black" />
-                </View>
+            <Send {...props}>
+              <View style={{marginRight: 10, marginBottom: 4}}>
+                <MaterialCommunityIcons name="send-circle-outline" size={34} color="black" />
               </View>
             </Send>
           );
-        } }
+        }}
         renderInputToolbar={props=>{
           return(
-              
-            <InputToolbar  {...props} 
+            <InputToolbar  {...props}
               containerStyle={
                 {backgroundColor:Colour.lightGray,height:46,borderRadius:20,marginRight:2,marginLeft:2,marginBottom:5}}>
-            </InputToolbar>  
-            
+            </InputToolbar>
+          );
+        }}
+        renderChatFooter={() => {
+          return (
+            <View>
+              {image && <Image source={image.path} style={{width: 200, height: 200}}/>}
+            </View>
           );
         }}
       />
@@ -206,9 +181,13 @@ export default function ChatPage() {
   
 }
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  content: { backgroundColor: "#ffffff", flex: 1 },
-  inputToolbarContainer:{flex:1, flexDirection:"row"},
+  container: {
+    flex: 1,
+  },
+  inputToolbarContainer:{
+    flex: 1,
+    flexDirection: "row"
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -227,5 +206,4 @@ const styles = StyleSheet.create({
   roundedImage: {
     borderRadius: 50,
   },
-
 });
