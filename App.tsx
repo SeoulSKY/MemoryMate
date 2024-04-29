@@ -8,7 +8,7 @@ import Quiz from "./src/screens/Quiz";
 import Result from "./src/screens/Result";
 import SignUp from "./src/screens/SignUp";
 import Home from "./src/screens/Home";
-import ChatPage from "./src/screens/ChatPage";
+import Chat from "./src/screens/Chat";
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -41,6 +41,16 @@ export default function App() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="Chat"
+              component={Chat}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="Quiz"
               component={Quiz}
               options={{ headerShown: false }}
@@ -48,16 +58,6 @@ export default function App() {
             <Stack.Screen
               name="Results"
               component={Result}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ChatPage"
-              component={ChatPage}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="SignUp"
-              component={SignUp}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>

@@ -76,3 +76,11 @@ export function parseStatusCode(error: Error): HttpStatusCode {
 
   return parseInt(match[1]);
 }
+
+/**
+ * Sleep for a given number of milliseconds
+ * @param ms The number of milliseconds to sleep
+ */
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View, ViewStyle} from "react-native";
-import {Image} from "expo-image";
+import {Image, ImageStyle} from "expo-image";
 import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 
 interface Props {
@@ -7,13 +7,14 @@ interface Props {
   name: string,
   text?: string,
   style?: ViewStyle | ViewStyle[],
+  imageStyle?: ImageStyle | ImageStyle[],
 }
 
-export default function Avatar({imagePath, name, text, style}: Props) {
+export default function Avatar({imagePath, name, text, style, imageStyle}: Props) {
   return (
     <View style={[styles.container, style]}>
       <View style={styles.avatarContainer}>
-        <Image source={imagePath} style={styles.profileImage}/>
+        <Image source={imagePath} style={[styles.profileImage, imageStyle]}/>
         <Text style={styles.name}>{name}</Text>
       </View>
       {text &&

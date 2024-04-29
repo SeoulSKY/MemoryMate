@@ -1,11 +1,12 @@
 import {genAI, parseStatusCode} from "./index";
 
-import {Storage, FileStorage} from "./storage";
+import {FileStorage, Storage} from "./storage";
 import {ChatSession, Content} from "@google/generative-ai";
-import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
+import {BotProfile, Participant, ProfileData, UserProfile} from "./profile";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
 import {rootLogger} from "../index";
+import {AppName} from "../constants";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
@@ -26,12 +27,26 @@ export interface Message {
  */
 function getInstruction(bot: ProfileData, user: ProfileData): Content {
   return {role: "user", parts: [{text:
-  `You are a chatbot for people with various dementia levels. The current patient's name is ${user.name}, 
-  gender is ${user.gender.toString()} and ${user.age} years old. Your goal is to retrieve as much information 
-  and their events as possible that will be used to personalize a set of questions and answers for their brain exercise 
-  (It's not your task though). Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an 
-  age ${bot.age}. Try to hide your actual intention and act as if you want to talk with them rather than retrieve 
-  information. Do not include your expression in the message. Start your message with greeting`}]};
+  `You are a professional consultant for people with various dementia levels. 
+  You work for an app called ${AppName}. 
+  It actively evaluates users' dementia levels through subtle cues and interactions, 
+  creating tailored cognitive exercises. These exercises are designed to stimulate various cognitive functions, 
+  ensuring that users receive targeted and effective cognitive stimulation.
+  But do not assume you know about the app other than the information provided.
+  The current patient's name is ${user.name}, gender is ${user.gender.toString()} and ${user.age} years old. 
+  Your responsibility is to retrieve as much information and their events as possible that will be used for 
+  tailored treatment later (It's not your task though). 
+  Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an age ${bot.age}. 
+  Act according to your personality. 
+  Try to hide your actual intention and act as if you want to talk with them rather than retrieve information. 
+  Do not include your expression in the message`
+  }]};
+}
+
+function getGreeting(bot: ProfileData, user: ProfileData): Content {
+  return {role: "model", parts: [{text:
+        `Hello, ${user.name}! I'm ${bot.name} and ${bot.age} years old. I'm here to chat with you. How are you today?`
+  }]};
 }
 
 export default class Chat {
@@ -71,24 +86,27 @@ export default class Chat {
 
     this.instance = new Chat(storageType);
 
-    if (await this.instance.hasHistory()) {
-      const history = [
-        getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
-      ];
+    const bot = await BotProfile.getInstance().get();
+    const user = await UserProfile.getInstance().get();
 
+    const history = [getInstruction(bot, user)];
+
+    if (await this.instance.hasHistory()) {
       for (const message of await this.instance.getHistory()) {
         history.push({role: message.author === Participant.USER ? "user" : "model", parts: [{text: message.text}]});
       }
-
-      this.instance.session = model.startChat({history: history});
     } else {
-      this.instance.session = model.startChat();
-
-      const bot = await BotProfile.getInstance().get();
-      const user = await UserProfile.getInstance().get();
-      const response = await this.instance.send(getInstruction(bot, user).parts[0].text!);
-      await this.instance.save([{author: Participant.BOT, text: response, images: [], timestamp: new Date()}]);
+      const greeting = {
+        author: Participant.BOT,
+        text: getGreeting(bot, user).parts[0].text!,
+        images: [],
+        timestamp: new Date(),
+      };
+      history.push({role: "model", parts: [{text: greeting.text}]});
+      await this.instance.save([greeting]);
     }
+
+    this.instance.session = model.startChat({history: history});
 
     return this.instance;
   }
@@ -108,7 +126,6 @@ export default class Chat {
 
     const timestamp = new Date();
 
-
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
@@ -120,7 +137,6 @@ export default class Chat {
     history.push({author: Participant.USER, text: message, images, timestamp});
     history.push({author: Participant.BOT, text: response, images: [], timestamp: new Date()});
     await this.save(history);
-
 
     return history.pop()!;
   }
@@ -191,7 +207,7 @@ export default class Chat {
       .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
       .then(async profiles => {
         const [bot, user] = await Promise.all(profiles);
-        this.session = model.startChat({history: [getInstruction(bot, user)]});
+        this.session = model.startChat({history: [getInstruction(bot, user), getGreeting(bot, user)]});
       });
   }
 
