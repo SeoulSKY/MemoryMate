@@ -42,7 +42,7 @@ export interface Storage<K, V> {
 
 export class FileStorage implements Storage<string, string> {
 
-  private BASE_PATH = documentDirectory!;
+  public static readonly basePath = documentDirectory!;
 
   /**
    * Check if the file storage has the file
@@ -50,7 +50,7 @@ export class FileStorage implements Storage<string, string> {
    * @returns true if the file exists, false otherwise
    */
   public async has(path: string): Promise<boolean> {
-    return getInfoAsync(this.BASE_PATH + path).then(info => info.exists);
+    return getInfoAsync(FileStorage.basePath + path).then(info => info.exists);
   }
 
   /**
@@ -64,7 +64,10 @@ export class FileStorage implements Storage<string, string> {
       throw new InvalidArgumentError(`File does not exist: ${path}`);
     }
 
-    return readAsStringAsync(this.BASE_PATH + path);
+    return readAsStringAsync(
+      FileStorage.basePath + path,
+      {encoding: this.isImage(path) ? "base64" : "utf8"}
+    );
   }
 
   /**
@@ -73,8 +76,12 @@ export class FileStorage implements Storage<string, string> {
    * @param value The value to set
    */
   public async set(path: string, value: string): Promise<void> {
-    await makeDirectoryAsync(this.BASE_PATH + path, {intermediates: true});
-    return writeAsStringAsync(this.BASE_PATH + path, value);
+    const nodes = (FileStorage.basePath + path).split("/");
+    path = nodes.slice(0, -1).join("/");
+    const fileName = nodes[nodes.length - 1];
+
+    await makeDirectoryAsync(path, {intermediates: true});
+    return writeAsStringAsync(`${path}/${fileName}`, value);
   }
 
   /**
@@ -87,6 +94,10 @@ export class FileStorage implements Storage<string, string> {
       throw new InvalidArgumentError(`File does not exist: ${path}`);
     }
 
-    return deleteAsync(this.BASE_PATH + path);
+    return deleteAsync(FileStorage.basePath + path);
+  }
+
+  private isImage(path: string): boolean {
+    return path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".gif");
   }
 }
