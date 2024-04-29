@@ -9,7 +9,7 @@ import {
   SystemMessage,
 } from "react-native-gifted-chat";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {StyleSheet, View} from "react-native";
+import {StyleSheet, TouchableOpacity, View, Text} from "react-native";
 import {BorderRadius, Colour} from "../constants";
 import {Feather, Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +19,8 @@ import {ImageData, MimeType} from "../utils/image";
 import Avatar from "../components/Avatar";
 import Chat from "../utils/chat";
 import {rootLogger} from "../index";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation, ParamListBase } from "@react-navigation/native";
 
 const logger = rootLogger.extend("Chat");
 
@@ -50,11 +52,17 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [image, setImage] = useState<ImageData>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  
+  const [botProfile, setBotProfile] = useState<ProfileData>();
+  const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   function appendMessage(message: IMessage) {
     setMessages(previousMessages => [...previousMessages, message]);
   }
 
+  /**
+   * Set the bot profile and the initial message
+   */
   useEffect(() => {
     Promise.all([
       BotProfile.getInstance().create(mockBotProfile),
@@ -79,6 +87,9 @@ export default function ChatPage() {
     }).catch(logger.error);
   }, []);
 
+  /**
+   * Pick an image from the image library
+   */
   async function pickImage(): Promise<ImageData | null> {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -100,10 +111,17 @@ export default function ChatPage() {
     })[0];
   }
 
+  /**
+   * Render the chat page
+   */
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="arrow-back-sharp" size={30} color="black" />
+        <Ionicons name="arrow-back-sharp" size={30} color="black" onPress={async () => {
+              
+          navigation.navigate("Home");
+              
+        }} />
         {botProfile && <Avatar imagePath={botProfile.image!.path} name={botProfile.name}/>}
       </View>
     
@@ -228,8 +246,15 @@ export default function ChatPage() {
         }}
         renderChatFooter={() => {
           return (
-            <View>
-              {image && <Image source={image.path} style={{width: 200, height: 200}}/>}
+            <View style ={{backgroundColor:Colour.lightGray,margin:15}}>
+              {image && <Image source={image.path} style={styles.pickedImage}/>}
+              {image &&<TouchableOpacity 
+                onPress={() => setImage(undefined)}
+                style={styles.removePickedImage}
+              >
+                  
+                <Text >X</Text>
+              </TouchableOpacity>}
             </View>
           );
         }}
