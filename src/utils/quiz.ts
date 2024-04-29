@@ -3,9 +3,11 @@ import {HttpError, InvalidStateError} from "./errors";
 import {genAI, HttpStatusCode, parseStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {UserProfile} from "./profile";
+import {rootLogger} from "../index";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 
+const logger = rootLogger.extend("Quiz");
 
 export enum Difficulty {
   EASY,
@@ -192,6 +194,8 @@ export default class Quiz {
     The chatbot is asking the question and the patient is making a choice. 
     Do not start your output with \`\`\`json and start with an open square bracket.`;
 
+    logger.debug(`Sending request to Gemini: ${request}`);
+
     let response: string;
     try {
       response = (await model.generateContent(request)).response.text();
@@ -201,6 +205,8 @@ export default class Quiz {
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
 
     // sometimes, the response is wrapped with ```json ```, a markdown syntax
     response = response.replace(/^```json\s*```$/i, "");

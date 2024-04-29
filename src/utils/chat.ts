@@ -5,9 +5,12 @@ import {ChatSession, Content} from "@google/generative-ai";
 import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
+import {rootLogger} from "../index";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
+
+const logger = rootLogger.extend("Chat");
 
 export interface Message {
   readonly author: Participant;
@@ -105,17 +108,19 @@ export default class Chat {
 
     const timestamp = new Date();
 
-    images = await Promise.all(images.map(image => Image.getInstance().saveFromGallery(image)));
 
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
     const response = await this.send(prompt);
 
+    images = await Promise.all(images.map(image => Image.getInstance().saveFromGallery(image)));
+
     const history = await this.hasHistory() ? await this.getHistory() : [];
     history.push({author: Participant.USER, text: message, images, timestamp});
     history.push({author: Participant.BOT, text: response, images: [], timestamp: new Date()});
     await this.save(history);
+
 
     return history.pop()!;
   }
@@ -127,14 +132,20 @@ export default class Chat {
    * @throws {HttpError} If failed to send the message
    */
   private async send(text: string): Promise<string> {
+    logger.debug(`Sending message to Gemini: ${text}`);
+
+    let response;
     try {
-      return (await this.session.sendMessage(text)).response.text();
+      response = (await this.session.sendMessage(text)).response.text();
     } catch (e) {
       if (e instanceof Error) {
         throw new HttpError(e.message, parseStatusCode(e));
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
+    return response;
   }
 
   /**
@@ -175,9 +186,7 @@ export default class Chat {
 
     return this.getHistory().then(history =>
       history.flatMap(message => message.images)
-        .map(image => image.path)
-        .filter(path => Image.getInstance().has(path as string))
-        .forEach(path => Image.getInstance().delete(path as string))
+        .forEach(path => Image.getInstance().delete(path))
     ).then(() => this.storage.delete(Chat.historyPath))
       .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
       .then(async profiles => {
@@ -198,6 +207,8 @@ export default class Chat {
       throw new InvalidArgumentError("No images are given");
     }
 
+    logger.debug(`Sending images to Gemini: ${images.map(image => image.path)}`);
+
     const imgs = await Promise.all(images.map(async image => {
       return {
         inlineData: {
@@ -207,14 +218,18 @@ export default class Chat {
       };
     }));
 
+    let response;
     try {
-      return (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
+      response = (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
     } catch (e) {
       if (e instanceof Error) {
         throw new HttpError(e.message, parseStatusCode(e));
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
+    return response;
   }
 
   /**

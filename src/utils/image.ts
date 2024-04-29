@@ -1,4 +1,4 @@
-import {copyAsync} from "expo-file-system";
+import {copyAsync, makeDirectoryAsync, readAsStringAsync} from "expo-file-system";
 import {FileStorage, Storage} from "./storage";
 import {InvalidArgumentError} from "./errors";
 
@@ -40,16 +40,16 @@ export default class Image {
 
   /**
    * Delete the image from the storage
-   * @param path The path to the image
-   * @throws {InvalidArgumentError} If the image is not found
+   * @param data The image data
+   * @throws {InvalidArgumentError} If the image path is invalid
    */
-  public async delete(path: string): Promise<void> {
-    if (!await this.has(path)) {
-      throw new InvalidArgumentError("Could not find image: " + Image.directory + path);
+  public async delete(data: ImageData) {
+    if (typeof data.path == "number") {
+      throw new InvalidArgumentError("Invalid image path: " + data.path);
     }
 
-    return this.storage.delete(Image.directory + path)
-      .then(() => this.storage.delete(this.replaceExtension(Image.directory + path, ".json")));
+    await this.storage.delete(data.path);
+    return this.storage.delete(this.replaceExtension(data.path, ".json"));
   }
 
   /**
@@ -59,29 +59,6 @@ export default class Image {
     return this.storage.delete(Image.directory);
   }
 
-  /**
-   * Get the image data from the storage
-   * @param path The path to the image
-   * @returns The image data
-   * @throws {InvalidArgumentError} If the image data is not found
-   */
-  public async get(path: string): Promise<ImageData> {
-    const dataPath = this.replaceExtension(path, ".json");
-    if (!await this.has(dataPath)) {
-      throw new InvalidArgumentError("Could not find image data: " + dataPath);
-    }
-
-    return JSON.parse(await this.storage.get(this.replaceExtension(Image.directory + path, ".json")));
-  }
-
-  /**
-   * Check if the image exists in the storage
-   * @param path The path to the image
-   * @returns true if the image exists, false otherwise
-   */
-  public async has(path: string): Promise<boolean> {
-    return this.storage.has(Image.directory + path);
-  }
 
   /**
    * Save the image from the gallery to the storage
@@ -99,13 +76,16 @@ export default class Image {
       throw new InvalidArgumentError("Invalid image path: " + data.path);
     }
 
-    return copyAsync({
+    await makeDirectoryAsync(FileStorage.basePath + Image.directory, {intermediates: true});
+
+    await copyAsync({
       from: data.path,
-      to: Image.directory + fileName,
-    }).then(() => {
-      this.storage.set(this.replaceExtension(Image.directory + fileName, ".json"), JSON.stringify(data));
-      return {...data, path: fileName};
+      to: FileStorage.basePath + Image.directory + fileName,
     });
+
+    await this.storage.set(this.replaceExtension(Image.directory + fileName, ".json"),
+      JSON.stringify(data));
+    return {...data, path: FileStorage.basePath + Image.directory + fileName};
   }
 
   /**
@@ -119,11 +99,12 @@ export default class Image {
       throw new InvalidArgumentError("Invalid image path: " + data.path);
     }
 
-    if (!await this.has(data.path)) {
-      throw new InvalidArgumentError("Could not find image: " + data.path);
+    const result = await readAsStringAsync(data.path, {encoding: "base64"});
+    if (result === undefined) {
+      throw new InvalidArgumentError("Invalid image path: " + data.path);
     }
 
-    return Buffer.from(await this.storage.get(Image.directory + data.path)).toString("base64");
+    return result;
   }
 
   /**

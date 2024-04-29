@@ -40,3 +40,5 @@ rules:
     - declaration
   prefer-arrow-callback:
     - error
+  no-console:
+    - error
