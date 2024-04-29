@@ -52,7 +52,7 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
   function appendMessage(message: IMessage) {
-    setMessages(previousMessages => [message, ...previousMessages]);
+    setMessages(previousMessages => [...previousMessages, message]);
   }
 
   useEffect(() => {
