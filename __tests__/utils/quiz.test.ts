@@ -1,7 +1,7 @@
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {spyOn} from "jest-mock";
 
-import {mockChatSession, MockStorage} from "../index";
+import {mockChat, MockStorage} from "../index";
 
 import Quiz, {Difficulty, MultipleChoiceQuestion} from "../../src/utils/quiz";
 import Chat, {Message} from "../../src/utils/chat";
@@ -129,7 +129,7 @@ describe("Quiz", () => {
     await BotProfile.getInstance(MockStorage).create(mockProfileData);
     await UserProfile.getInstance(MockStorage).create(mockProfileData);
 
-    mockChatSession();
+    mockChat();
 
     chat = await Chat.getInstance(MockStorage);
   });
