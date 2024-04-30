@@ -207,7 +207,7 @@ export default function SignUp() {
             gender: gender!,
           });
 
-          navigation.navigate("ChatPage");
+          navigation.navigate("Chat");
         }}/>
     </SafeAreaView>
   );

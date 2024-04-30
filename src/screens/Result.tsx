@@ -3,11 +3,14 @@ import {StackNavigationProp} from "@react-navigation/stack";
 import {ParamListBase, useNavigation} from "@react-navigation/native";
 import Avatar from "../components/Avatar";
 import {useEffect, useState} from "react";
-import {Gender, ProfileData} from "../utils/profile";
+import {BotProfile, ProfileData} from "../utils/profile";
 import {SafeAreaView} from "react-native-safe-area-context";
 import CircularProgress from "react-native-circular-progress-indicator";
 import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
-import {Difficulty, MultipleChoiceQuestion} from "../utils/quiz";
+import Quiz from "../utils/quiz";
+import {rootLogger} from "../index";
+import {usePulseAnimation} from "../hooks/animations/pulseAnimation";
+import Animated from "react-native-reanimated";
 
 const feedbacks = [
   "You're on your way! Keep exploring and learning. Every step forward is progress!",
@@ -15,82 +18,35 @@ const feedbacks = [
   "Wow! You nailed it! Your hard work and dedication are paying off. Keep shining bright!",
 ];
 
+const logger = rootLogger.extend("Result");
+
 const minScore = 50;
 
 export default function Result() {
-  const [botProfile, setBotProfile] = useState<ProfileData | undefined>();
+  const [botProfile, setBotProfile] = useState<ProfileData>();
   const [score, setScore] = useState(minScore);
   const [feedback, setFeedback] = useState(feedbacks[0]);
-  const [questions, setQuestions] = useState<MultipleChoiceQuestion[] | undefined>();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
+  const {pulseStyle} = usePulseAnimation();
+
   useEffect(() => {
-    // BotProfile.getInstance().get().then(setBotProfile).catch(console.error);
-    // Quiz.getInstance().getSavedQuiz().then(setQuestions).catch(console.error);
+    (async function () {
+      setBotProfile(await BotProfile.getInstance().get());
+      const quiz = await Quiz.getInstance().getSavedQuiz();
 
-    // mock data
-    setBotProfile({
-      name: "Ben",
-      image: {
-        path: require("../../assets/profiles/male/40_0.png"),
-        width: 256,
-        height: 256,
-        mimeType: "image/png",
-      },
-      age: 0,
-      gender: Gender.MALE,
-    });
+      const result = Math.max(minScore, quiz.filter(q => q.isCorrect()).length / quiz.length * 100);
+      setScore(result);
 
-    setQuestions([
-      new MultipleChoiceQuestion(
-        "So, I went to the market today. It was crowded. Where did you go yesterday?",
-        Difficulty.EASY,
-        ["Library", "Mary's House", "Stayed at Home", "Swimming Pool"],
-        1,
-      ).setAnswer(1),
-      new MultipleChoiceQuestion(
-        "What is the capital of France?",
-        Difficulty.NORMAL,
-        ["Paris", "London", "Berlin", "Madrid"],
-        0,
-      ).setAnswer(0),
-      new MultipleChoiceQuestion(
-        "What is the capital of Spain?",
-        Difficulty.NORMAL,
-        ["Paris", "London", "Berlin", "Madrid"],
-        3,
-      ).setAnswer(3),
-      new MultipleChoiceQuestion(
-        "What is the capital of Germany?",
-        Difficulty.NORMAL,
-        ["Paris", "London", "Berlin", "Madrid"],
-        2,
-      ).setAnswer(2),
-      new MultipleChoiceQuestion(
-        "What is the capital of England?",
-        Difficulty.NORMAL,
-        ["Paris", "London", "Berlin", "Madrid"],
-        1,
-      ).setAnswer(1),
-    ]);
+      if (result <= minScore) {
+        setFeedback(feedbacks[0]);
+      } else if (result <= 80) {
+        setFeedback(feedbacks[1]);
+      } else {
+        setFeedback(feedbacks[2]);
+      }
+    })().catch(logger.error);
   }, []);
-
-  useEffect(() => {
-    if (questions === undefined) {
-      return;
-    }
-
-    const result = Math.max(minScore, questions.filter(q => q.isCorrect()).length / questions.length * 100);
-    setScore(result);
-
-    if (result <= minScore) {
-      setFeedback(feedbacks[0]);
-    } else if (result <= 80) {
-      setFeedback(feedbacks[1]);
-    } else {
-      setFeedback(feedbacks[2]);
-    }
-  }, [questions]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -113,9 +69,11 @@ export default function Result() {
           progressValueStyle={styles.scoreValue}
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("ChatPage")}>
-        <Text style={styles.buttonText}>Return to chat</Text>
-      </TouchableOpacity>
+      <Animated.View style={pulseStyle}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Chat")}>
+          <Text style={styles.buttonText}>Return to chat</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </SafeAreaView>
   );
 }

@@ -1,16 +1,15 @@
 import React, {useEffect, useRef, useState} from "react";
-import {
-  Bubble,
-  GiftedChat,
-  IMessage,
-} from "react-native-gifted-chat";
+import {Bubble, GiftedChat, IMessage,} from "react-native-gifted-chat";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
   StyleSheet,
+  Text,
+  TextInput,
   TouchableOpacity,
   View,
-  TextInput,
-  Text, KeyboardAvoidingView, FlatList,
 } from "react-native";
 import {BorderRadius, Colour, FontFamily, FontSize} from "../constants";
 import {Ionicons, MaterialCommunityIcons} from "@expo/vector-icons";
@@ -21,18 +20,18 @@ import {ImageData, MimeType} from "../utils/image";
 import Avatar from "../components/Avatar";
 import Chat from "../utils/chat";
 import {rootLogger} from "../index";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation, ParamListBase } from "@react-navigation/native";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {ParamListBase, useNavigation} from "@react-navigation/native";
 import {HttpError} from "../utils/errors";
 import Quiz from "../utils/quiz";
-import {sleep} from "../utils";
+import {HttpStatusCode, sleep} from "../utils";
 
 const logger = rootLogger.extend("Chat");
 
 const userId = 1;
 const botId = 2;
 
-const numUserMessagesForQuiz = 10;
+const numUserMessagesForQuiz = 1;
 
 const quizLoadingMessages = [
   "Let's engage our minds with a simple quiz!",
@@ -63,41 +62,46 @@ export default function () {
     setHistory(previousMessages => [...previousMessages, message]);
   }
 
-  /**
-   * Set the bot profile and the initial message
-   */
+  async function loadData() {
+    if (!await BotProfile.getInstance().has() || !await UserProfile.getInstance().has()) {
+      navigation.navigate("SignUp");
+      return;
+    }
+
+    const bot = await BotProfile.getInstance().get();
+
+    setBotProfile(bot);
+    const chat = await Chat.getInstance();
+    setChat(chat);
+
+    setHistory((await chat.getHistory()).map((message, i) => {
+      return {
+        _id: i,
+        text: message.text,
+        createdAt: message.timestamp,
+        user: {
+          _id: message.author === Participant.BOT ? botId : userId,
+          name: message.author === Participant.BOT ? bot.name : undefined,
+          avatar: message.author === Participant.BOT ? bot.image!.path : undefined
+        },
+        image: message.images.length > 0 ? message.images[0].path as string : undefined,
+      };
+    }));
+  }
+
   useEffect(() => {
-    (async function() {
-      if (!await BotProfile.getInstance().has() || !await UserProfile.getInstance().has()) {
-        navigation.navigate("SignUp");
-        return;
-      }
-
-      const bot = await BotProfile.getInstance().get();
-
-      setBotProfile(bot);
-      const chat = await Chat.getInstance();
-      setChat(chat);
-
-      setHistory((await chat.getHistory()).map((message, i) => {
-        return {
-          _id: i,
-          text: message.text,
-          createdAt: message.timestamp,
-          user: {
-            _id: message.author === Participant.BOT ? botId : userId,
-            name: message.author === Participant.BOT ? bot.name : undefined,
-            avatar: message.author === Participant.BOT ? bot.image!.path : undefined
-          },
-          image: message.images.length > 0 ? message.images[0].path as string : undefined,
-        };
-      }));
-    })().catch(logger.error);
+    loadData().catch(logger.error);
   }, []);
 
   useEffect(() => {
     chatContainer.current?.scrollToEnd({animated: true});
   }, [history]);
+
+  useEffect(() => {
+    return navigation.addListener("focus",() => {
+      loadData().catch(logger.error);
+    });
+  }, [navigation]);
 
   /**
    * Pick an image from the image library
@@ -127,7 +131,10 @@ export default function () {
    * Render the chat page
    */
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} onStartShouldSetResponder={() => {
+      Keyboard.dismiss();
+      return false;
+    }}>
       <View style={styles.header}>
         <Ionicons name="arrow-back-sharp" size={30} color="black" onPress={async () => {
 
@@ -156,7 +163,7 @@ export default function () {
           _id: userId,
         }}
         listViewProps={{
-          style: styles.listBox
+          style: styles.listBox,
         }}
         lightboxProps={{
           style: styles.lightBox,
@@ -253,10 +260,15 @@ export default function () {
             } catch (e) {
               let message;
               if (e instanceof HttpError) {
-                message = "Sorry, I'm having trouble connecting to the server. Please try again later.";
+                if (e.status === HttpStatusCode.TOO_MANY_REQUESTS) {
+                  message = "I'm sorry, I'm currently busy. Let's chat later.";
+                } else {
+                  logger.error(e);
+                  message = "I'm sorry, something happened on my end. Let's chat later.";
+                }
               } else {
                 logger.error(e);
-                message = "Sorry, something went wrong. Please try again later.";
+                message = "I'm sorry, something happened on my end. Let's chat later.";
               }
 
               imageToSend && setImage(imageToSend);
@@ -277,9 +289,25 @@ export default function () {
               return;
             }
 
+            let isQuiz = (await chat!.getHistory())
+              .filter(m => m.author === Participant.USER).length % numUserMessagesForQuiz === 0;
+
+            if (isQuiz) {
+              try {
+                await Quiz.getInstance().create();
+              } catch (e) {
+                logger.error(e);
+
+                // continue chatting if failed to create quiz
+                isQuiz = false;
+              }
+            }
+
+            setIsTyping(false);
+
             appendMessage({
               _id: Date.now(),
-              text: reply.text,
+              text: isQuiz ? quizLoadingMessages[Math.floor(Math.random() * quizLoadingMessages.length)] : reply.text,
               createdAt: reply.timestamp,
               user: {
                 _id: botId,
@@ -288,28 +316,10 @@ export default function () {
               },
             });
 
-            if ((await chat!.getHistory())
-              .filter(m => m.author === Participant.USER).length % numUserMessagesForQuiz !== 0) {
-              setIsTyping(false);
-              return;
+            if (isQuiz) {
+              await sleep(3000);
+              navigation.navigate("Quiz");
             }
-
-            await sleep(1000);
-
-            appendMessage({
-              _id: Date.now(),
-              text: quizLoadingMessages[Math.floor(Math.random() * quizLoadingMessages.length)],
-              createdAt: Date.now(),
-              user: {
-                _id: botId,
-                name: botProfile!.name,
-                avatar: botProfile!.image?.path,
-              },
-            });
-
-            await Quiz.getInstance().create();
-
-            navigation.navigate("Quiz");
           }}>
             <MaterialCommunityIcons name="send-circle-outline" style={styles.inputButtonText} />
           </TouchableOpacity>}
@@ -332,6 +342,8 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     marginBottom: "2%",
     zIndex: 1,
+    borderTopColor: Colour.lightGray,
+    borderTopWidth: 1,
   },
   input: {
     flex: 1,
@@ -394,7 +406,5 @@ const styles = StyleSheet.create({
     marginBottom: "-10%",
     borderTopColor: Colour.lightGray,
     borderTopWidth: 1,
-    borderBottomColor: Colour.lightGray,
-    borderBottomWidth: 1,
   },
 });

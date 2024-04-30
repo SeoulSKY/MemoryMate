@@ -1,7 +1,7 @@
-import {genAI, parseStatusCode} from "./index";
+import {genAI} from "./index";
 
 import {FileStorage, Storage} from "./storage";
-import {ChatSession, Content} from "@google/generative-ai";
+import {ChatSession, Content, GenerationConfig, GoogleGenerativeAIResponseError} from "@google/generative-ai";
 import {BotProfile, Participant, ProfileData, UserProfile} from "./profile";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
@@ -39,7 +39,8 @@ function getInstruction(bot: ProfileData, user: ProfileData): Content {
   Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an age ${bot.age}. 
   Act according to your personality. 
   Try to hide your actual intention and act as if you want to talk with them rather than retrieve information. 
-  Do not include your expression in the message`
+  Do not include your expression or other information, such as time sent, in your message. 
+  Your message must feel natural like chatting with a human`
   }]};
 }
 
@@ -55,10 +56,17 @@ export default class Chat {
 
   private static readonly historyPath = "chatHistory.json";
 
+  private static generationConfig: GenerationConfig = {
+    stopSequences: [
+      "<ctrl100>"
+    ],
+  };
+
   public storage: Storage<string, string>;
 
   // @ts-expect-error it will be assigned in getInstance()
   private session: ChatSession;
+
 
   private constructor(storageType: new () => Storage<string, string>) {
     this.storage = new storageType();
@@ -106,7 +114,7 @@ export default class Chat {
       await this.instance.save([greeting]);
     }
 
-    this.instance.session = model.startChat({history: history});
+    this.instance.session = model.startChat({history: history, generationConfig: this.generationConfig});
 
     return this.instance;
   }
@@ -154,8 +162,8 @@ export default class Chat {
     try {
       response = (await this.session.sendMessage(text)).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }
@@ -203,12 +211,15 @@ export default class Chat {
     return this.getHistory().then(history =>
       history.flatMap(message => message.images)
         .forEach(path => Image.getInstance().delete(path))
-    ).then(() => this.storage.delete(Chat.historyPath))
-      .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
-      .then(async profiles => {
-        const [bot, user] = await Promise.all(profiles);
-        this.session = model.startChat({history: [getInstruction(bot, user), getGreeting(bot, user)]});
+    ).then(async () => {
+      await this.storage.delete(Chat.historyPath);
+      const bot = await BotProfile.getInstance().get();
+      const user = await UserProfile.getInstance().get();
+      this.session = model.startChat({
+        history: [getInstruction(bot, user), getGreeting(bot, user)],
+        generationConfig: Chat.generationConfig,
       });
+    });
   }
 
   /**
@@ -238,8 +249,8 @@ export default class Chat {
     try {
       response = (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }

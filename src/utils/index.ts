@@ -62,22 +62,6 @@ export enum HttpStatusCode {
 }
 
 /**
- * Parse the status code from the error message
- * @param error The error from Gemini API
- */
-export function parseStatusCode(error: Error): HttpStatusCode {
-  // noinspection RegExpRedundantEscape
-  const regex = /\[(\d+)[\s\w]*\]/;
-
-  const match = regex.exec(error.message);
-  if (match === null) {
-    throw new SyntaxError("Couldn't parse the status code from the message: " + error.message);
-  }
-
-  return parseInt(match[1]);
-}
-
-/**
  * Sleep for a given number of milliseconds
  * @param ms The number of milliseconds to sleep
  */
