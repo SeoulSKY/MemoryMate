@@ -31,7 +31,7 @@ const logger = rootLogger.extend("Chat");
 const userId = 1;
 const botId = 2;
 
-const numUserMessagesForQuiz = 1;
+const numUserMessagesForQuiz = 10;
 
 const quizLoadingMessages = [
   "Let's engage our minds with a simple quiz!",
