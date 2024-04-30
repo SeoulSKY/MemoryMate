@@ -1,7 +1,7 @@
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {spyOn} from "jest-mock";
 
-import {mockChatSession, MockStorage} from "../index";
+import {mockChat, MockStorage} from "../index";
 
 import Chat, {Message} from "../../src/utils/chat";
 import {InvalidArgumentError, InvalidStateError} from "../../src/utils/errors";
@@ -41,7 +41,7 @@ describe("Chat", () => {
     await UserProfile.getInstance(MockStorage).create(mockProfileData);
     await BotProfile.getInstance(MockStorage).create(mockProfileData);
 
-    mockChatSession();
+    mockChat();
 
     chat = await Chat.getInstance(MockStorage);
 

@@ -13,19 +13,30 @@ import { UserProfile } from "../utils/profile";
 import {useEffect, useState} from "react";
 import Animated from "react-native-reanimated";
 import {usePulseAnimation} from "../hooks/animations/pulseAnimation";
+import {rootLogger} from "../index";
+
+const logger = rootLogger.extend("Home");
 
 export default function Home() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [buttonText, setButtonText] = useState("Let's get started!");
   const {pulseStyle} = usePulseAnimation();
 
+  async function loadData() {
+    if (await UserProfile.getInstance().has()) {
+      setButtonText("Let's chat!");
+    }
+  }
+
   useEffect(() => {
-    UserProfile.getInstance().has().then((hasProfile) => {
-      if (hasProfile) {
-        setButtonText("Continue");
-      }
-    });
+    loadData().catch(logger.error);
   },[]);
+
+  useEffect(() => {
+    navigation.addListener("focus", async () =>
+      loadData().catch(logger.error)
+    );
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -56,7 +67,7 @@ Play brain games to keep your mind sharp.`}</Text>
             style={styles.button}
             onPress={async () => {
               if (await UserProfile.getInstance().has()) {
-                navigation.navigate("ChatPage");
+                navigation.navigate("Chat");
               } else {
                 navigation.navigate("SignUp");
               }

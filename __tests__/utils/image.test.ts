@@ -7,11 +7,12 @@ import {MockStorage} from "../index";
 import Image, {ImageData} from "../../src/utils/image";
 import {InvalidArgumentError} from "../../src/utils/errors";
 
+const directory = Image["directory"];
 const mockImagePath = "image.jpg";
-const mockImageJsonPath = mockImagePath.replace(".jpg", ".json");
+const mockImageJsonPath = directory + mockImagePath.replace(".jpg", ".json");
 
 const mockImageData: ImageData = {
-  path: mockImagePath,
+  path: directory + mockImagePath,
   width: 100,
   height: 100,
   mimeType: "image/jpeg",
@@ -19,12 +20,12 @@ const mockImageData: ImageData = {
 
 describe("Image", () => {
   const image = Image.getInstance(MockStorage);
-  const directory = Image["directory"];
+
   let storage: MockStorage<string, string>;
 
   async function setMockImage(): Promise<ImageData> {
-    await storage.set(directory + mockImageData.path, "data");
-    await storage.set(directory + mockImageJsonPath, JSON.stringify(mockImageData));
+    await storage.set(mockImageData.path as string, "data");
+    await storage.set(mockImageJsonPath, JSON.stringify(mockImageData));
 
     return mockImageData;
   }
@@ -38,51 +39,27 @@ describe("Image", () => {
     it("should delete the image", async () => {
       await setMockImage();
 
-      await image.delete(mockImagePath);
+      await image.delete(mockImageData);
 
-      expect(await storage.has(directory + mockImageData.path)).toBe(false);
-      expect(await storage.has(directory + mockImageJsonPath)).toBe(false);
+      expect(await storage.has(mockImageData.path as string)).toBe(false);
+      expect(await storage.has(mockImageJsonPath)).toBe(false);
     });
 
     it("should throw InvalidArgumentError if the image is not found", async () => {
-      await expect(image.delete(mockImagePath)).rejects.toThrow(InvalidArgumentError);
-    });
-  });
-
-  describe("get", () => {
-    it("should get the image data", async () => {
-      await setMockImage();
-
-      expect(await image.get(mockImagePath)).toEqual(mockImageData);
-    });
-
-    it("should throw InvalidArgumentError if the image data is not found", async () => {
-      await expect(image.get(mockImagePath)).rejects.toThrow(InvalidArgumentError);
-    });
-  });
-
-  describe("has", () => {
-    it("should return true if the image exists", async () => {
-      await setMockImage();
-
-      expect(await image.has(mockImagePath)).toBe(true);
-    });
-
-    it("should return false if the image does not exist", async () => {
-      expect(await image.has(mockImagePath)).toBe(false);
+      await expect(image.delete(mockImageData)).rejects.toThrow(InvalidArgumentError);
     });
   });
 
   describe("copyFromGallery", () => {
     it("should copy the image from gallery", async () => {
       spyOn(FileSystem, "copyAsync").mockImplementation(async () => {
-        await storage.set(directory + mockImageData.path, "data");
+        await storage.set(mockImageData.path as string, "data");
       });
 
       await image.saveFromGallery(mockImageData);
 
-      expect(await storage.get(directory + mockImageData.path)).toBe("data");
-      expect(await storage.get(directory + mockImageJsonPath)).toBe(JSON.stringify(mockImageData));
+      expect(await storage.get(mockImageData.path as string)).toBe("data");
+      expect(await storage.get(mockImageJsonPath as string)).toBe(JSON.stringify(mockImageData));
     });
 
     it("should throw InvalidArgumentError if the image path is invalid", async () => {

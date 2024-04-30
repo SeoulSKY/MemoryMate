@@ -1,7 +1,7 @@
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {spyOn} from "jest-mock";
 
-import {mockChatSession, MockStorage} from "../index";
+import {mockChat, MockStorage} from "../index";
 
 import Quiz, {Difficulty, MultipleChoiceQuestion} from "../../src/utils/quiz";
 import Chat, {Message} from "../../src/utils/chat";
@@ -111,6 +111,7 @@ describe("MultipleChoiceQuestion", () => {
         difficulty: Difficulty.EASY,
         correctAnswer: 1,
         choices: ["1", "2", "3", "4"],
+        answer: 1,
         isCorrect: true,
       });
     });
@@ -129,7 +130,7 @@ describe("Quiz", () => {
     await BotProfile.getInstance(MockStorage).create(mockProfileData);
     await UserProfile.getInstance(MockStorage).create(mockProfileData);
 
-    mockChatSession();
+    mockChat();
 
     chat = await Chat.getInstance(MockStorage);
   });
@@ -160,7 +161,10 @@ describe("Quiz", () => {
     it("should get the previous quiz", async () => {
       await storage.set(path, JSON.stringify(mockQuiz.map(q => q.toJSON())));
 
-      expect(await quiz.getSavedQuiz()).toEqual(mockQuiz.map(q => q.toJSON()));
+      const questions = await quiz.getSavedQuiz();
+      questions.forEach(q => expect(q).toBeInstanceOf(MultipleChoiceQuestion));
+      expect(questions.map(q => q.toJSON()))
+        .toEqual(mockQuiz.map(q => q.toJSON()));
     });
 
     it("should throw InvalidStateError if there is no previous quiz", async () => {

@@ -1,13 +1,17 @@
-import {genAI, parseStatusCode} from "./index";
+import {genAI} from "./index";
 
-import {Storage, FileStorage} from "./storage";
-import {ChatSession, Content} from "@google/generative-ai";
-import {Participant, ProfileData, BotProfile, UserProfile} from "./profile";
+import {FileStorage, Storage} from "./storage";
+import {ChatSession, Content, GenerationConfig, GoogleGenerativeAIResponseError} from "@google/generative-ai";
+import {BotProfile, Participant, ProfileData, UserProfile} from "./profile";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
+import {rootLogger} from "../index";
+import {AppName} from "../constants";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
+
+const logger = rootLogger.extend("Chat");
 
 export interface Message {
   readonly author: Participant;
@@ -23,12 +27,27 @@ export interface Message {
  */
 function getInstruction(bot: ProfileData, user: ProfileData): Content {
   return {role: "user", parts: [{text:
-  `You are a chatbot for people with various dementia levels. The current patient's name is ${user.name}, 
-  gender is ${user.gender.toString()} and ${user.age} years old. Your goal is to retrieve as much information 
-  and their events as possible that will be used to personalize a set of questions and answers for their brain exercise 
-  (It's not your task though). Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an 
-  age ${bot.age}. Try to hide your actual intention and act as if you want to talk with them rather than retrieve 
-  information. Do not include your expression in the message. Start your message with greeting`}]};
+  `You are a professional consultant for people with various dementia levels. 
+  You work for an app called ${AppName}. 
+  It actively evaluates users' dementia levels through subtle cues and interactions, 
+  creating tailored cognitive exercises. These exercises are designed to stimulate various cognitive functions, 
+  ensuring that users receive targeted and effective cognitive stimulation.
+  But do not assume you know about the app other than the information provided.
+  The current patient's name is ${user.name}, gender is ${user.gender.toString()} and ${user.age} years old. 
+  Your responsibility is to retrieve as much information and their events as possible that will be used for 
+  tailored treatment later (It's not your task though). 
+  Set your personality with a name ${bot.name}, a gender ${bot.gender.toString()} and an age ${bot.age}. 
+  Act according to your personality. 
+  Try to hide your actual intention and act as if you want to talk with them rather than retrieve information. 
+  Do not include your expression or other information, such as time sent, in your message. 
+  Your message must feel natural like chatting with a human`.replace("\n", "")
+  }]};
+}
+
+function getGreeting(bot: ProfileData, user: ProfileData): Content {
+  return {role: "model", parts: [{text:
+        `Hello, ${user.name}! I'm ${bot.name} and ${bot.age} years old. I'm here to chat with you. How are you today?`
+  }]};
 }
 
 export default class Chat {
@@ -37,10 +56,17 @@ export default class Chat {
 
   private static readonly historyPath = "chatHistory.json";
 
+  private static generationConfig: GenerationConfig = {
+    stopSequences: [
+      "<ctrl100>"
+    ],
+  };
+
   public storage: Storage<string, string>;
 
   // @ts-expect-error it will be assigned in getInstance()
   private session: ChatSession;
+
 
   private constructor(storageType: new () => Storage<string, string>) {
     this.storage = new storageType();
@@ -68,24 +94,27 @@ export default class Chat {
 
     this.instance = new Chat(storageType);
 
-    if (await this.instance.hasHistory()) {
-      const history = [
-        getInstruction(await BotProfile.getInstance().get(), await UserProfile.getInstance().get()),
-      ];
+    const bot = await BotProfile.getInstance().get();
+    const user = await UserProfile.getInstance().get();
 
+    const history = [getInstruction(bot, user)];
+
+    if (await this.instance.hasHistory()) {
       for (const message of await this.instance.getHistory()) {
         history.push({role: message.author === Participant.USER ? "user" : "model", parts: [{text: message.text}]});
       }
-
-      this.instance.session = model.startChat({history: history});
     } else {
-      this.instance.session = model.startChat();
-
-      const bot = await BotProfile.getInstance().get();
-      const user = await UserProfile.getInstance().get();
-      const response = await this.instance.send(getInstruction(bot, user).parts[0].text!);
-      await this.instance.save([{author: Participant.BOT, text: response, images: [], timestamp: new Date()}]);
+      const greeting = {
+        author: Participant.BOT,
+        text: getGreeting(bot, user).parts[0].text!,
+        images: [],
+        timestamp: new Date(),
+      };
+      history.push({role: "model", parts: [{text: greeting.text}]});
+      await this.instance.save([greeting]);
     }
+
+    this.instance.session = model.startChat({history: history, generationConfig: this.generationConfig});
 
     return this.instance;
   }
@@ -105,12 +134,12 @@ export default class Chat {
 
     const timestamp = new Date();
 
-    images = await Promise.all(images.map(image => Image.getInstance().saveFromGallery(image)));
-
     const prompt = message + "\n" +
       (images.length > 0 ? "Images sent: " + await this.getImageDescriptions(images) + "\n" : "") +
       "Time sent: " + timestamp.toISOString();
     const response = await this.send(prompt);
+
+    images = await Promise.all(images.map(image => Image.getInstance().saveFromGallery(image)));
 
     const history = await this.hasHistory() ? await this.getHistory() : [];
     history.push({author: Participant.USER, text: message, images, timestamp});
@@ -127,14 +156,20 @@ export default class Chat {
    * @throws {HttpError} If failed to send the message
    */
   private async send(text: string): Promise<string> {
+    logger.debug(`Sending message to Gemini: ${text}`);
+
+    let response;
     try {
-      return (await this.session.sendMessage(text)).response.text();
+      response = (await this.session.sendMessage(text)).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
+    return response;
   }
 
   /**
@@ -175,15 +210,16 @@ export default class Chat {
 
     return this.getHistory().then(history =>
       history.flatMap(message => message.images)
-        .map(image => image.path)
-        .filter(path => Image.getInstance().has(path as string))
-        .forEach(path => Image.getInstance().delete(path as string))
-    ).then(() => this.storage.delete(Chat.historyPath))
-      .then(() => [BotProfile.getInstance().get(), UserProfile.getInstance().get()])
-      .then(async profiles => {
-        const [bot, user] = await Promise.all(profiles);
-        this.session = model.startChat({history: [getInstruction(bot, user)]});
+        .forEach(path => Image.getInstance().delete(path))
+    ).then(async () => {
+      await this.storage.delete(Chat.historyPath);
+      const bot = await BotProfile.getInstance().get();
+      const user = await UserProfile.getInstance().get();
+      this.session = model.startChat({
+        history: [getInstruction(bot, user), getGreeting(bot, user)],
+        generationConfig: Chat.generationConfig,
       });
+    });
   }
 
   /**
@@ -198,6 +234,8 @@ export default class Chat {
       throw new InvalidArgumentError("No images are given");
     }
 
+    logger.debug(`Sending images to Gemini: ${images.map(image => image.path)}`);
+
     const imgs = await Promise.all(images.map(async image => {
       return {
         inlineData: {
@@ -207,14 +245,18 @@ export default class Chat {
       };
     }));
 
+    let response;
     try {
-      return (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
+      response = (await visionModel.generateContent(["Describe these images", ...imgs])).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
+    return response;
   }
 
   /**

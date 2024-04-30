@@ -1,11 +1,14 @@
 import {FileStorage, Storage} from "./storage";
-import {HttpError, InvalidStateError} from "./errors";
-import {genAI, HttpStatusCode, parseStatusCode} from "./index";
+import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
+import {genAI, HttpStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {UserProfile} from "./profile";
+import {rootLogger} from "../index";
+import {GoogleGenerativeAIResponseError} from "@google/generative-ai";
 
 const model = genAI.getGenerativeModel({model: "gemini-pro"});
 
+const logger = rootLogger.extend("Quiz");
 
 export enum Difficulty {
   EASY,
@@ -99,6 +102,7 @@ export abstract class Question<Q, A> {
       question: this.question,
       difficulty: this.difficulty,
       correctAnswer: this.correctAnswer,
+      answer: this.isAnswered() ? this.answer : undefined,
       isCorrect: this.isAnswered() ? this.isCorrect() : undefined,
     };
   }
@@ -190,55 +194,37 @@ export default class Quiz {
     ${Object.keys(Difficulty).length / 2} and an index to the correct choice. The object keys must be question, 
     difficulty, choices and correctAnswer. Do not create questions and choices in the third person point of view. 
     The chatbot is asking the question and the patient is making a choice. 
-    Do not start your output with \`\`\`json and start with an open square bracket.`;
+    Do not start your output with \`\`\`json and start with an open square bracket.`.replace("\n", "");
+
+    logger.debug(`Sending request to Gemini: ${request}`);
 
     let response: string;
     try {
       response = (await model.generateContent(request)).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
 
     // sometimes, the response is wrapped with ```json ```, a markdown syntax
     response = response.replace(/^```json\s*```$/i, "");
 
-    interface Response {
-      question: string,
-      difficulty: Difficulty,
-      choices: string[],
-      correctAnswer: number,
-    }
-
-    let json: Response[];
+    let json;
     try {
       json = JSON.parse(response);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (!(Array.isArray(json) && json.every((item: any) =>
-        typeof item.question === "string" &&
-        typeof item.difficulty === "number" &&
-        Array.isArray(item.choices) &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        item.choices.every((choice: any) => typeof choice === "string") &&
-        typeof item.correctAnswer === "number"
-      ))) {
-        // noinspection ExceptionCaughtLocallyJS
-        throw new TypeError("Parsed JSON does not conform to the Response[] interface");
-      }
     } catch (e) {
-      if (e instanceof SyntaxError || e instanceof TypeError) {
-        throw new HttpError("Failed to parse the response into json: " + response, HttpStatusCode.BAD_REQUEST);
-      }
-      throw e;
+      throw new HttpError("Failed to parse the response into json: " + response, HttpStatusCode.BAD_REQUEST);
     }
 
-    const quiz = json.map(q =>
-      new MultipleChoiceQuestion(q.question, q.difficulty, q.choices, q.correctAnswer)
-    );
+    if (!Quiz.isValid(json)) {
+      throw new HttpError("Invalid JSON: " + response, HttpStatusCode.BAD_REQUEST);
+    }
 
+    const quiz = Quiz.parse(json);
     await this.save(quiz);
     return quiz;
   }
@@ -262,16 +248,22 @@ export default class Quiz {
     result of the previous quiz, try your best to evaluate their dementia level, considering their cognitive abilities, 
     and behavioural and psychological symptoms. The patient's age is ${profile.age} and gender is 
     ${profile.gender.toString()}. Only explain your evaluations and do not suggest any recommendations or things to 
-    consider`;
+    consider`.replace("\n", "");
 
+    logger.debug(`Sending request to Gemini: ${request}`);
+
+    let response;
     try {
-      return (await model.generateContent(request)).response.text();
+      response = (await model.generateContent(request)).response.text();
     } catch (e) {
-      if (e instanceof Error) {
-        throw new HttpError(e.message, parseStatusCode(e));
+      if (e instanceof GoogleGenerativeAIResponseError) {
+        throw new HttpError(e.message, e.response.status);
       }
       throw e;
     }
+
+    logger.debug(`Received response from Gemini: ${response}`);
+    return response;
   }
 
   /**
@@ -292,7 +284,7 @@ export default class Quiz {
       throw new InvalidStateError("No saved quiz found");
     }
 
-    return JSON.parse(await this.storage.get(Quiz.path));
+    return Quiz.parse(JSON.parse(await this.storage.get(Quiz.path)));
   }
 
   /**
@@ -313,5 +305,41 @@ export default class Quiz {
     }
 
     return this.storage.delete(Quiz.path);
+  }
+
+  private static isValid(json: object[]): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Array.isArray(json) && json.every((item: any) =>
+      typeof item.question === "string" &&
+      typeof item.difficulty === "number" &&
+      Array.isArray(item.choices) &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      item.choices.every((choice: any) => typeof choice === "string") &&
+      typeof item.correctAnswer === "number" && item.correctAnswer >= 0 && item.correctAnswer < item.choices.length &&
+      (item.answer === undefined || typeof item.answer === "number") &&
+      (item.isCorrect === undefined || typeof item.isCorrect === "boolean")
+    );
+  }
+
+  /**
+   * Parse the JSON into array of MultipleChoiceQuestion objects
+   * @param json The JSON to parse
+   * @returns The array of MultipleChoiceQuestion objects
+   * @throws {InvalidArgumentError} If the JSON is invalid
+   */
+  private static parse(json: object[]): MultipleChoiceQuestion[] {
+    if (!Quiz.isValid(json)) {
+      throw new InvalidArgumentError("Invalid JSON:\n" + JSON.stringify(json, null, 2));
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return json.map((item: any) => {
+      const q = new MultipleChoiceQuestion(item.question, item.difficulty, item.choices, item.correctAnswer);
+      if (item.answer !== undefined) {
+        q.setAnswer(item.answer);
+      }
+
+      return q;
+    });
   }
 }

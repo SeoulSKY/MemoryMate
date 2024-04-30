@@ -1,21 +1,14 @@
 import {InvalidArgumentError} from "../src/utils/errors";
 import {Storage} from "../src/utils/storage";
 import {spyOn} from "jest-mock";
-import {ChatSession, FunctionCall} from "@google/generative-ai";
+import Chat from "../src/utils/chat";
+import {rootLogger} from "../src";
 
-export function mockChatSession() {
-  return spyOn(ChatSession.prototype, "sendMessage")
-    .mockResolvedValue({
-      response: {
-        text: () => "response",
-        functionCalls: function (): FunctionCall[] | undefined {
-          throw new Error("Function not implemented.");
-        },
-        functionCall: function (): FunctionCall | undefined {
-          throw new Error("Function not implemented.");
-        }
-      }
-    });
+rootLogger.disable();
+
+export function mockChat() {
+  // @ts-expect-error for testing purposes
+  return spyOn(Chat.prototype, "send").mockResolvedValue("response");
 }
 
 export class MockStorage<K, V> implements Storage<K, V> {
