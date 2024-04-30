@@ -194,7 +194,7 @@ export default class Quiz {
     ${Object.keys(Difficulty).length / 2} and an index to the correct choice. The object keys must be question, 
     difficulty, choices and correctAnswer. Do not create questions and choices in the third person point of view. 
     The chatbot is asking the question and the patient is making a choice. 
-    Do not start your output with \`\`\`json and start with an open square bracket.`;
+    Do not start your output with \`\`\`json and start with an open square bracket.`.replace("\n", "");
 
     logger.debug(`Sending request to Gemini: ${request}`);
 
@@ -248,7 +248,7 @@ export default class Quiz {
     result of the previous quiz, try your best to evaluate their dementia level, considering their cognitive abilities, 
     and behavioural and psychological symptoms. The patient's age is ${profile.age} and gender is 
     ${profile.gender.toString()}. Only explain your evaluations and do not suggest any recommendations or things to 
-    consider`;
+    consider`.replace("\n", "");
 
     logger.debug(`Sending request to Gemini: ${request}`);
 

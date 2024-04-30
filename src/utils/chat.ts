@@ -40,7 +40,7 @@ function getInstruction(bot: ProfileData, user: ProfileData): Content {
   Act according to your personality. 
   Try to hide your actual intention and act as if you want to talk with them rather than retrieve information. 
   Do not include your expression or other information, such as time sent, in your message. 
-  Your message must feel natural like chatting with a human`
+  Your message must feel natural like chatting with a human`.replace("\n", "")
   }]};
 }
 
