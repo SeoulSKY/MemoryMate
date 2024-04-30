@@ -32,7 +32,7 @@ const userId = 1;
 const botId = 2;
 
 const minNumUserMessagesForQuiz = 10;
-const quizPercentage = 0.1;
+const quizProbability = 0.1;
 
 const quizLoadingMessages = [
   "Let's engage our minds with a simple quiz!",
@@ -290,7 +290,7 @@ export default function () {
               return;
             }
 
-            let isQuiz = Math.random() < quizPercentage &&
+            let isQuiz = Math.random() < quizProbability &&
               history.filter(m => m.user._id === userId).length >= minNumUserMessagesForQuiz;
 
             if (isQuiz) {

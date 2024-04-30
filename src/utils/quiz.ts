@@ -184,7 +184,7 @@ export default class Quiz {
     const data = {
       chatHistory: chatHistory.map(message => {
         return {author: message.author, text: message.text};
-      }).slice(0, -2), // remove the last chat history
+      }).slice(0, -1), // remove the last chat history
       evaluation: this.evaluate(chatHistory),
     };
 
