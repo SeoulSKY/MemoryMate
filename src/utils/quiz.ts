@@ -2,7 +2,7 @@ import {FileStorage, Storage} from "./storage";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import {genAI, HttpStatusCode} from "./index";
 import Chat, {Message} from "./chat";
-import {UserProfile} from "./profile";
+import {Participant, UserProfile} from "./profile";
 import {rootLogger} from "../index";
 import {GoogleGenerativeAIResponseError} from "@google/generative-ai";
 
@@ -15,6 +15,8 @@ export enum Difficulty {
   NORMAL,
   HARD,
 }
+
+const numDifficulties = 3;
 
 export abstract class Question<Q, A> {
   protected readonly question: Q;
@@ -182,19 +184,30 @@ export default class Quiz {
     const data = {
       chatHistory: chatHistory.map(message => {
         return {author: message.author, text: message.text};
-      }),
+      }).slice(0, -2), // remove the last chat history
       evaluation: this.evaluate(chatHistory),
     };
 
-    const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
-    evaluation of the patient's dementia level above, create personalized multiple-choice questions for a memory game 
-    from the patient's facts or events extracted by the chat history with the proper mixture of difficulties while 
-    considering their dementia level. The entire output must be formatted as a minified JSON, containing a list of 
-    ${Quiz.numQuestions} questions with ${Quiz.numChoices} choices, its difficulty level between 1 and 
-    ${Object.keys(Difficulty).length / 2} and an index to the correct choice. The object keys must be question, 
-    difficulty, choices and correctAnswer. Do not create questions and choices in the third person point of view. 
-    The chatbot is asking the question and the patient is making a choice. 
-    Do not start your output with \`\`\`json and start with an open square bracket.`.replace("\n", "");
+    const exampleQuestion = {
+      question: "What was the name of the flower you like to grow?",
+      difficulty: Difficulty.NORMAL,
+      correctAnswer: 0,
+      choices: ["Tiger lily", "Rose", "Daisy", "Sunflower"],
+    }
+
+    const request = JSON.stringify(data) + "\n" +
+      "From the chat history between the patient (" + Participant.USER + ") and a consultant (" + Participant.BOT +
+      "), create multiple-choice questions for the patient's cognitive exercise from the chat history with " +
+      "the proper mixture of difficulties tailored to their dementia level. The questions must be designed to " +
+      "stimulate various cognitive functions, ensuring the patient receives targeted and effective cognitive " +
+      "stimulation. Do not create questions that can't be answered without guessing. Any ordinary person should be " +
+      "able to answer them while reading the chat history. There must be no questions asking the consultant's name. " +
+      "The entire output must be formatted as a minified JSON without any additional white spaces, with an array of " +
+      Quiz.numQuestions + " questions with exactly " + Quiz.numChoices +
+      " choices, its difficulty level between 1 and " + numDifficulties + " and an index to the correct choice. " +
+      "Questions must be in past tense and formatted as if the consultant is asking the patient and " +
+      "the patient is making a choice. For example, the following is a valid format of a question object: " +
+      JSON.stringify(exampleQuestion) + ". Start your output with an open square bracket"
 
     logger.debug(`Sending request to Gemini: ${request}`);
 
@@ -210,7 +223,7 @@ export default class Quiz {
 
     logger.debug(`Received response from Gemini: ${response}`);
 
-    // sometimes, the response is wrapped with ```json ```, a markdown syntax
+    // sometimes, the response is wrapped with ```json (string)```,
     response = response.replace(/^```json\s*```$/i, "");
 
     let json;
@@ -243,12 +256,11 @@ export default class Quiz {
     };
 
     const profile = await UserProfile.getInstance().get();
-
-    const request = `${JSON.stringify(data)}\nFrom the chat history between the patient and a chatbot and the 
-    result of the previous quiz, try your best to evaluate their dementia level, considering their cognitive abilities, 
-    and behavioural and psychological symptoms. The patient's age is ${profile.age} and gender is 
-    ${profile.gender.toString()}. Only explain your evaluations and do not suggest any recommendations or things to 
-    consider`.replace("\n", "");
+    const request = JSON.stringify(data) + "\n" +
+      "From the chat history between the patient and a consultant and the result of the previous quiz, " +
+      "try your best to evaluate their dementia level, considering their cognitive abilities, and behavioural and " +
+      "psychological symptoms. The patient's age is " + profile.age + "and gender is " +
+      profile.gender + ". Your output should consist of paragraphs";
 
     logger.debug(`Sending request to Gemini: ${request}`);
 

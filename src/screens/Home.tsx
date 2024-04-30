@@ -22,19 +22,19 @@ export default function Home() {
   const [buttonText, setButtonText] = useState("Let's get started!");
   const {pulseStyle} = usePulseAnimation();
 
-  async function loadData() {
+  async function init() {
     if (await UserProfile.getInstance().has()) {
       setButtonText("Let's chat!");
     }
   }
 
   useEffect(() => {
-    loadData().catch(logger.error);
+    init().catch(logger.error);
   },[]);
 
   useEffect(() => {
     navigation.addListener("focus", async () =>
-      loadData().catch(logger.error)
+      init().catch(logger.error)
     );
   }, [navigation]);
 

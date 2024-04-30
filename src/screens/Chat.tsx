@@ -63,7 +63,7 @@ export default function () {
     setHistory(previousMessages => [...previousMessages, message]);
   }
 
-  async function loadData() {
+  async function init() {
     if (!await BotProfile.getInstance().has() || !await UserProfile.getInstance().has()) {
       navigation.navigate("SignUp");
       return;
@@ -91,7 +91,7 @@ export default function () {
   }
 
   useEffect(() => {
-    loadData().catch(logger.error);
+    init().catch(logger.error);
   }, []);
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function () {
 
   useEffect(() => {
     return navigation.addListener("focus",() => {
-      loadData().catch(logger.error);
+      init().catch(logger.error);
     });
   }, [navigation]);
 
