@@ -31,7 +31,8 @@ const logger = rootLogger.extend("Chat");
 const userId = 1;
 const botId = 2;
 
-const numUserMessagesForQuiz = 10;
+const minNumUserMessagesForQuiz = 10;
+const quizPercentage = 0.1;
 
 const quizLoadingMessages = [
   "Let's engage our minds with a simple quiz!",
@@ -289,8 +290,8 @@ export default function () {
               return;
             }
 
-            let isQuiz = (await chat!.getHistory())
-              .filter(m => m.author === Participant.USER).length % numUserMessagesForQuiz === 0;
+            let isQuiz = Math.random() < quizPercentage &&
+              history.filter(m => m.user._id === userId).length >= minNumUserMessagesForQuiz;
 
             if (isQuiz) {
               try {
@@ -298,7 +299,7 @@ export default function () {
               } catch (e) {
                 logger.error(e);
 
-                // continue chatting if failed to create quiz
+                // continue chat if failed to create quiz
                 isQuiz = false;
               }
             }
