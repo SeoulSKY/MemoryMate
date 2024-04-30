@@ -193,7 +193,7 @@ export default class Quiz {
       difficulty: Difficulty.NORMAL,
       correctAnswer: 0,
       choices: ["Tiger lily", "Rose", "Daisy", "Sunflower"],
-    }
+    };
 
     const request = JSON.stringify(data) + "\n" +
       "From the chat history between the patient (" + Participant.USER + ") and a consultant (" + Participant.BOT +
@@ -207,7 +207,7 @@ export default class Quiz {
       " choices, its difficulty level between 1 and " + numDifficulties + " and an index to the correct choice. " +
       "Questions must be in past tense and formatted as if the consultant is asking the patient and " +
       "the patient is making a choice. For example, the following is a valid format of a question object: " +
-      JSON.stringify(exampleQuestion) + ". Start your output with an open square bracket"
+      JSON.stringify(exampleQuestion) + ". Start your output with an open square bracket";
 
     logger.debug(`Sending request to Gemini: ${request}`);
 
