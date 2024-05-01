@@ -58,7 +58,7 @@ export default class Chat {
 
   private static generationConfig: GenerationConfig = {
     stopSequences: [
-      "<ctrl100>"
+      "<ctrl"
     ],
   };
 

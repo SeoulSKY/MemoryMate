@@ -22,7 +22,7 @@ import Chat from "../utils/chat";
 import {rootLogger} from "../index";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {ParamListBase, useNavigation} from "@react-navigation/native";
-import {HttpError} from "../utils/errors";
+import {HttpError, NotEnoughDataError} from "../utils/errors";
 import Quiz from "../utils/quiz";
 import {HttpStatusCode, sleep} from "../utils";
 
@@ -31,7 +31,7 @@ const logger = rootLogger.extend("Chat");
 const userId = 1;
 const botId = 2;
 
-const minNumUserMessagesForQuiz = 10;
+const minNumUserMessagesForQuiz = 20;
 const quizProbability = 0.1;
 
 const quizLoadingMessages = [
@@ -209,17 +209,19 @@ export default function () {
         }}
         renderInputToolbar={() => <View/>}
       />
-      <KeyboardAvoidingView behavior={"position"}>
-        <View style={styles.imagePreviewContainer}>
-          {image && <Image source={image.path} style={[styles.imagePreview, {aspectRatio: image.width / image.height}]}>
-            <TouchableOpacity
-              onPress={() => setImage(undefined)}
-              style={styles.imagePreviewButton}
-            >
-              <Text style={styles.imagePreviewText}>×</Text>
-            </TouchableOpacity>
-          </Image>}
-        </View>
+      <KeyboardAvoidingView behavior={"padding"}>
+        {image && <View style={styles.imagePreviewContainer}>
+          <Image
+            source={{uri: image.path as string}}
+            style={[styles.imagePreview, {aspectRatio: image.width / image.height}]}
+          />
+          <TouchableOpacity
+            onPress={() => setImage(undefined)}
+            style={styles.imagePreviewButton}
+          >
+            <Text style={styles.imagePreviewText}>×</Text>
+          </TouchableOpacity>
+        </View>}
         <View style={styles.inputContainer}>
           <TouchableOpacity onPress={async () => {
             const image = await pickImage();
@@ -297,8 +299,9 @@ export default function () {
               try {
                 await Quiz.getInstance().create();
               } catch (e) {
-                logger.error(e);
-
+                if (!(e instanceof NotEnoughDataError)) {
+                  logger.error(e);
+                }
                 // continue chat if failed to create quiz
                 isQuiz = false;
               }
@@ -333,6 +336,7 @@ export default function () {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: "5%"
   },
   inputContainer: {
     flexDirection: "row",
@@ -380,14 +384,16 @@ const styles = StyleSheet.create({
     width: "30%",
     height: "auto",
     borderRadius: BorderRadius.medium,
-    margin: 5
+    margin: "1%",
   },
   imagePreviewButton:{
+    position: "absolute",
+    top: 12,
+    left: 12,
     minWidth: 30,
     minHeight: 30,
-    height: "20%",
+    height: "40%",
     aspectRatio: 1,
-    margin: "5%",
     backgroundColor: Colour.white,
     borderRadius: 1000000,
     opacity: 0.8,
@@ -397,8 +403,9 @@ const styles = StyleSheet.create({
   imagePreviewText: {
     textAlign: "center",
     color: Colour.black,
-    fontSize: FontSize.medium,
+    fontSize: FontSize.medium - 3,
     fontFamily: FontFamily.robotoMedium,
+    fontWeight: "bold",
   },
   lightBox: {
     padding: "1%",

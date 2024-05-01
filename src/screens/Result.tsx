@@ -35,7 +35,13 @@ export default function Result() {
       setBotProfile(await BotProfile.getInstance().get());
       const quiz = await Quiz.getInstance().getSavedQuiz();
 
-      const result = Math.max(minScore, quiz.filter(q => q.isCorrect()).length / quiz.length * 100);
+      const incorrectQuestions = quiz.filter(q => !q.isCorrect());
+
+      if (incorrectQuestions.length !== 0) {
+        logger.debug(`Incorrect questions: ${JSON.stringify(incorrectQuestions, null, 2)}`);
+      }
+
+      const result = Math.max(minScore, (quiz.length - incorrectQuestions.length) / quiz.length * 100);
       setScore(result);
 
       if (result <= minScore) {

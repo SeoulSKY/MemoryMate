@@ -33,3 +33,12 @@ export class HttpError extends Error {
     this.status = status;
   }
 }
+
+/**
+ * Error for not enough data
+ */
+export class NotEnoughDataError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}

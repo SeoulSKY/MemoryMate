@@ -1,5 +1,5 @@
 import {FileStorage, Storage} from "./storage";
-import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
+import {HttpError, InvalidArgumentError, InvalidStateError, NotEnoughDataError} from "./errors";
 import {genAI, HttpStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {Participant, UserProfile} from "./profile";
@@ -177,13 +177,14 @@ export default class Quiz {
    * @returns The quiz
    * @throws {InvalidStateError} If no chat history is found
    * @throws {HttpError} If failed to generate the quiz from the model
+   * @throws {NotEnoughDataError} If not enough chat history to generate the quiz
    */
   public async create(): Promise<MultipleChoiceQuestion[]> {
     const chatHistory = await (await Chat.getInstance()).getHistory();
 
     const data = {
       chatHistory: chatHistory.map(message => {
-        return {author: message.author, text: message.text};
+        return {author: message.author, text: message.text, timestamp: message.timestamp.toISOString()};
       }).slice(0, -1), // remove the last chat history
       evaluation: this.evaluate(chatHistory),
     };
@@ -206,8 +207,9 @@ export default class Quiz {
       Quiz.numQuestions + " questions with exactly " + Quiz.numChoices +
       " choices, its difficulty level between 1 and " + numDifficulties + " and an index to the correct choice. " +
       "Questions must be in past tense and formatted as if the consultant is asking the patient and " +
-      "the patient is making a choice. For example, the following is a valid format of a question object: " +
-      JSON.stringify(exampleQuestion) + ". Start your output with an open square bracket";
+      "the patient is making a choice. Use second-person pronounces instead of the patient's name. " +
+      "For example, the following is a valid format of a question object: " + JSON.stringify(exampleQuestion) +
+      ". Start your output with an open square bracket";
 
     logger.debug(`Sending request to Gemini: ${request}`);
 
@@ -234,7 +236,7 @@ export default class Quiz {
     }
 
     if (!Quiz.isValid(json)) {
-      throw new HttpError("Invalid JSON: " + response, HttpStatusCode.BAD_REQUEST);
+      throw new NotEnoughDataError(`Not enough chat history to generate ${Quiz.numQuestions} questions`);
     }
 
     const quiz = Quiz.parse(json);
@@ -259,7 +261,7 @@ export default class Quiz {
     const request = JSON.stringify(data) + "\n" +
       "From the chat history between the patient and a consultant and the result of the previous quiz, " +
       "try your best to evaluate their dementia level, considering their cognitive abilities, and behavioural and " +
-      "psychological symptoms. The patient's age is " + profile.age + "and gender is " +
+      "psychological symptoms. The patient's age is " + profile.age + " and gender is " +
       profile.gender + ". Your output should consist of paragraphs";
 
     logger.debug(`Sending request to Gemini: ${request}`);
