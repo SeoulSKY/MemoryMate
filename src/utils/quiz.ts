@@ -324,7 +324,7 @@ export default class Quiz {
     return Array.isArray(json) && json.every((item: any) =>
       typeof item.question === "string" &&
       typeof item.difficulty === "number" &&
-      Array.isArray(item.choices) &&
+      Array.isArray(item.choices) && item.choices.length === Quiz.numChoices &&
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       item.choices.every((choice: any) => typeof choice === "string") &&
       typeof item.correctAnswer === "number" && item.correctAnswer >= 0 && item.correctAnswer < item.choices.length &&
