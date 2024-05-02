@@ -1,7 +1,38 @@
-import {GoogleGenerativeAI} from "@google/generative-ai";
+import {
+  GenerationConfig,
+  GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
+  SafetySetting
+} from "@google/generative-ai";
+
+const generationConfig: GenerationConfig = {
+  stopSequences: [
+    "<ctrl"
+  ],
+};
+
+const safetySettings: SafetySetting[] = [
+  {"category": HarmCategory.HARM_CATEGORY_HATE_SPEECH, "threshold": HarmBlockThreshold.BLOCK_NONE},
+  {"category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+  {"category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+  {"category": HarmCategory.HARM_CATEGORY_HARASSMENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+];
 
 export const genAI = new GoogleGenerativeAI(
   process.env.EXPO_PUBLIC_GEMINI_TOKEN || "undefined");
+
+export const languageModel = genAI.getGenerativeModel({
+  model: "gemini-pro",
+  generationConfig,
+  safetySettings,
+});
+
+export const visionModel = genAI.getGenerativeModel({
+  model: "gemini-pro-vision",
+  generationConfig,
+  safetySettings,
+});
 
 export enum HttpStatusCode {
   CONTINUE = 100,

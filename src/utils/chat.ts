@@ -1,15 +1,16 @@
-import {genAI} from "./index";
-
 import {FileStorage, Storage} from "./storage";
-import {ChatSession, Content, GenerationConfig, GoogleGenerativeAIResponseError} from "@google/generative-ai";
+import {
+  ChatSession,
+  Content, GoogleGenerativeAIFetchError,
+  GoogleGenerativeAIResponseError,
+} from "@google/generative-ai";
 import {BotProfile, Participant, ProfileData, UserProfile} from "./profile";
 import {HttpError, InvalidArgumentError, InvalidStateError} from "./errors";
 import Image, {ImageData} from "./image";
 import {rootLogger} from "../index";
 import {AppName} from "../constants";
+import {HttpStatusCode, languageModel, visionModel} from "./index";
 
-const model = genAI.getGenerativeModel({model: "gemini-pro"});
-const visionModel = genAI.getGenerativeModel({model: "gemini-pro-vision"});
 
 const logger = rootLogger.extend("Chat");
 
@@ -55,12 +56,6 @@ export default class Chat {
   private static instance: Chat;
 
   private static readonly historyPath = "chatHistory.json";
-
-  private static generationConfig: GenerationConfig = {
-    stopSequences: [
-      "<ctrl"
-    ],
-  };
 
   public storage: Storage<string, string>;
 
@@ -114,7 +109,7 @@ export default class Chat {
       await this.instance.save([greeting]);
     }
 
-    this.instance.session = model.startChat({history: history, generationConfig: this.generationConfig});
+    this.instance.session = languageModel.startChat({history: history});
 
     return this.instance;
   }
@@ -164,6 +159,8 @@ export default class Chat {
     } catch (e) {
       if (e instanceof GoogleGenerativeAIResponseError) {
         throw new HttpError(e.message, e.response.status);
+      } else if (e instanceof GoogleGenerativeAIFetchError) {
+        throw new HttpError(e.message, e.status ?? HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
       throw e;
     }
@@ -215,9 +212,8 @@ export default class Chat {
       await this.storage.delete(Chat.historyPath);
       const bot = await BotProfile.getInstance().get();
       const user = await UserProfile.getInstance().get();
-      this.session = model.startChat({
+      this.session = languageModel.startChat({
         history: [getInstruction(bot, user), getGreeting(bot, user)],
-        generationConfig: Chat.generationConfig,
       });
     });
   }

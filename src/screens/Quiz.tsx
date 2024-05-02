@@ -171,7 +171,7 @@ export default function (){
             }
 
             questions.forEach((question, i) => {
-              question.setAnswer(selections[i]);
+              question.setAnswer(question.getChoices()[selections[i]]);
             });
 
             await Quiz.getInstance().save(questions);

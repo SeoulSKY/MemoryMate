@@ -263,7 +263,8 @@ export default function () {
             } catch (e) {
               let message;
               if (e instanceof HttpError) {
-                if (e.status === HttpStatusCode.TOO_MANY_REQUESTS) {
+                if (e.status === HttpStatusCode.TOO_MANY_REQUESTS || e.status === HttpStatusCode.SERVICE_UNAVAILABLE) {
+                  logger.info(e);
                   message = "I'm sorry, I'm currently busy. Let's chat later.";
                 } else {
                   logger.error(e);
@@ -336,7 +337,6 @@ export default function () {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: "5%"
   },
   inputContainer: {
     flexDirection: "row",

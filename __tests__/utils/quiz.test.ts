@@ -35,7 +35,7 @@ describe("MultipleChoiceQuestion", () => {
   let question: MultipleChoiceQuestion;
 
   beforeEach(() => {
-    question = new MultipleChoiceQuestion("What is 1 + 1?", Difficulty.EASY, ["1", "2", "3", "4"], 1);
+    question = new MultipleChoiceQuestion("What is 1 + 1?", Difficulty.EASY, ["1", "2", "3", "4"], "2");
   });
 
   describe("getQuestion", () => {
@@ -57,7 +57,7 @@ describe("MultipleChoiceQuestion", () => {
 
     it("should return true if the question is answered", () => {
       // @ts-expect-error for testing purposes
-      question.answer = 1;
+      question.answer = "2";
       expect(question.isAnswered()).toBe(true);
     });
   });
@@ -65,8 +65,8 @@ describe("MultipleChoiceQuestion", () => {
   describe("getAnswer", () => {
     it("should get the answered value", () => {
       // @ts-expect-error for testing purposes
-      question.answer = 1;
-      expect(question.getAnswer()).toEqual(1);
+      question.answer = "2";
+      expect(question.getAnswer()).toEqual("2");
     });
 
     it("should throw InvalidStateError if the question is not answered", () => {
@@ -76,25 +76,25 @@ describe("MultipleChoiceQuestion", () => {
 
   describe("setAnswer", () => {
     it("should set the answer", () => {
-      question.setAnswer(1);
+      question.setAnswer("2");
       expect(question.isAnswered()).toBe(true);
-      expect(question.getAnswer()).toEqual(1);
+      expect(question.getAnswer()).toEqual("2");
     });
 
     it("should throw InvalidStateError if the question is already answered", () => {
-      question.setAnswer(1);
-      expect(() => question.setAnswer(1)).toThrowError(InvalidStateError);
+      question.setAnswer("2");
+      expect(() => question.setAnswer("2")).toThrowError(InvalidStateError);
     });
   });
 
   describe("isCorrect", () => {
     it("should return true if the answer is correct", () => {
-      question.setAnswer(1);
+      question.setAnswer("2");
       expect(question.isCorrect()).toBe(true);
     });
 
     it("should return false if the answer is incorrect", () => {
-      question.setAnswer(2);
+      question.setAnswer("1");
       expect(question.isCorrect()).toBe(false);
     });
 
@@ -105,13 +105,13 @@ describe("MultipleChoiceQuestion", () => {
 
   describe("toJSON", () => {
     it("should convert the question to JSON", () => {
-      question.setAnswer(1);
+      question.setAnswer("2");
       expect(question.toJSON()).toEqual({
         question: "What is 1 + 1?",
         difficulty: Difficulty.EASY,
-        correctAnswer: 1,
+        correctAnswer: "2",
         choices: ["1", "2", "3", "4"],
-        answer: 1,
+        answer: "2",
         isCorrect: true,
       });
     });
@@ -140,8 +140,8 @@ describe("Quiz", () => {
     quiz["storage"] = storage;
 
     mockQuiz = [
-      new MultipleChoiceQuestion("What is 1 + 1?", Difficulty.EASY, ["1", "2", "3", "4"], 1),
-      new MultipleChoiceQuestion("What is 2 + 2?", Difficulty.NORMAL, ["1", "2", "3", "4"], 3),
+      new MultipleChoiceQuestion("What is 1 + 1?", Difficulty.EASY, ["1", "2", "3", "4"], "2"),
+      new MultipleChoiceQuestion("What is 2 + 2?", Difficulty.NORMAL, ["1", "2", "3", "4"], "4"),
     ];
   });
 

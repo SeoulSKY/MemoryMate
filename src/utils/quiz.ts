@@ -1,12 +1,11 @@
 import {FileStorage, Storage} from "./storage";
 import {HttpError, InvalidArgumentError, InvalidStateError, NotEnoughDataError} from "./errors";
-import {genAI, HttpStatusCode} from "./index";
+import {HttpStatusCode} from "./index";
 import Chat, {Message} from "./chat";
 import {Participant, UserProfile} from "./profile";
 import {rootLogger} from "../index";
 import {GoogleGenerativeAIResponseError} from "@google/generative-ai";
-
-const model = genAI.getGenerativeModel({model: "gemini-pro"});
+import {languageModel} from "./index";
 
 const logger = rootLogger.extend("Quiz");
 
@@ -110,12 +109,12 @@ export abstract class Question<Q, A> {
   }
 }
 
-export class MultipleChoiceQuestion extends Question<string, number> {
+export class MultipleChoiceQuestion extends Question<string, string> {
 
   private readonly choices: string[];
 
-  public constructor(question: string, difficulty: Difficulty, choices: string[], correctChoice: number) {
-    super(question, difficulty, correctChoice);
+  public constructor(question: string, difficulty: Difficulty, choices: string[], correctAnswer: string) {
+    super(question, difficulty, correctAnswer);
 
     this.choices = choices;
   }
@@ -125,8 +124,8 @@ export class MultipleChoiceQuestion extends Question<string, number> {
    * @param choice The answer
    * @throws {InvalidStateError} If the answer choice is invalid
    */
-  public setAnswer(choice: number) {
-    if (!Number.isInteger(choice) || choice < 0 || choice >= this.choices.length) {
+  public setAnswer(choice: string) {
+    if (this.choices.find(c => c === choice) === undefined) {
       throw new InvalidStateError("Invalid answer choice: " + choice);
     }
 
@@ -192,8 +191,8 @@ export default class Quiz {
     const exampleQuestion = {
       question: "What was the name of the flower you like to grow?",
       difficulty: Difficulty.NORMAL,
-      correctAnswer: 0,
       choices: ["Tiger lily", "Rose", "Daisy", "Sunflower"],
+      correctAnswer: "Tiger lily",
     };
 
     const request = JSON.stringify(data) + "\n" +
@@ -204,8 +203,9 @@ export default class Quiz {
       "stimulation. Do not create questions that can't be answered without guessing. Any ordinary person should be " +
       "able to answer them while reading the chat history. There must be no questions asking the consultant's name. " +
       "The entire output must be formatted as a minified JSON without any additional white spaces, with an array of " +
-      Quiz.numQuestions + " questions with exactly " + Quiz.numChoices +
-      " choices, its difficulty level between 1 and " + numDifficulties + " and an index to the correct choice. " +
+      Quiz.numQuestions + " questions with exactly " + Quiz.numChoices + " choices, " +
+      "its difficulty level between 1 and " + numDifficulties + " and the correct answer. " +
+      "The value of correctAnswer must be identical in one of the choices. " +
       "Questions must be in past tense and formatted as if the consultant is asking the patient and " +
       "the patient is making a choice. Use second-person pronounces instead of the patient's name. " +
       "For example, the following is a valid format of a question object: " + JSON.stringify(exampleQuestion) +
@@ -215,7 +215,7 @@ export default class Quiz {
 
     let response: string;
     try {
-      response = (await model.generateContent(request)).response.text();
+      response = (await languageModel.generateContent(request)).response.text();
     } catch (e) {
       if (e instanceof GoogleGenerativeAIResponseError) {
         throw new HttpError(e.message, e.response.status);
@@ -268,7 +268,7 @@ export default class Quiz {
 
     let response;
     try {
-      response = (await model.generateContent(request)).response.text();
+      response = (await languageModel.generateContent(request)).response.text();
     } catch (e) {
       if (e instanceof GoogleGenerativeAIResponseError) {
         throw new HttpError(e.message, e.response.status);
@@ -329,8 +329,9 @@ export default class Quiz {
       Array.isArray(item.choices) && item.choices.length === Quiz.numChoices &&
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       item.choices.every((choice: any) => typeof choice === "string") &&
-      typeof item.correctAnswer === "number" && item.correctAnswer >= 0 && item.correctAnswer < item.choices.length &&
-      (item.answer === undefined || typeof item.answer === "number") &&
+      typeof item.correctAnswer === "string" &&
+      item.choices.find((c: string) => c === item.correctAnswer) !== undefined &&
+      (item.answer === undefined || typeof item.answer === "string") &&
       (item.isCorrect === undefined || typeof item.isCorrect === "boolean")
     );
   }
