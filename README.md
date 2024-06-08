@@ -13,6 +13,11 @@
     <img src="https://github.com/SeoulSKY/MemoryMate/actions/workflows/jest.yml/badge.svg" alt="jest">
 </div>
 
+## Feature Overview
+
+| `Sign Up` | `Chat` | `Quiz` |
+| -- | -- | -- |
+| <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/signup.gif" style="width: 500px; height: auto" alt="signup"> | <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/chat.gif" style="width: 500px; height: auto" alt="chat"> | <img src="https://github.com/SeoulSKY/MemoryMate/blob/main/assets/quiz.gif" style="width: 500px; height: auto" alt="quiz">
 
 ## How to Set up and Run
 
